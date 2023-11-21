@@ -5,7 +5,7 @@
 // configuration
 #define SENSOR_PIN A0
 #define UNITS 1023
-#define MIDI_CHANNEL 1
+#define MIDI_CHANNEL 3
 // can't suggest going over 8 per second -> problems with hairless midi or windows wavetable, sampling rate throttles amount of notes being played
 #define SAMPLING_RATE_PER_SECOND 1
 #define NOTE_DURATION_MS (int)((1/(SAMPLING_RATE_PER_SECOND))*1000)
@@ -17,7 +17,7 @@
 #define INPUT_VOLTAGE 5.0 
 // in Ohms
 #define REFERENCE_RESISTANCE 100
-#define THRESHOLD 10
+#define THRESHOLD 1
 
 // Create and bind the MIDI interface to the default hardware Serial port
 MIDI_CREATE_DEFAULT_INSTANCE();
@@ -33,10 +33,13 @@ Note notes[MAX_NOTES];
 // initialization
 int measured_units = 0;
 float measured_resistance = 0;
-int last_measured_resistance = 0;
+float last_measured_resistance = 0;
+float lowest_measured_resistance = 0;
+float highest_measured_resistance = 0;
 
 float totalResistance = 0;
 int resistanceReadings = 0;
+float absDifference = 0;
 
 //function declarations
 float calculate_output_voltage(float, int);
@@ -45,6 +48,8 @@ void play_note(int);
 void updateAverageResistance(float);
 float getAverageResistance();
 int getDynamicNoteFromResistance(float);
+int getDynamicNoteFromDifference(float);
+void updateLowestAndHighestResistance(float);
 
 /*
 * below are representative midi values for their equal temperament note equivalent
@@ -67,8 +72,12 @@ MIDI.begin(MIDI_CHANNEL);
 void loop() {
   measured_units = analogRead(SENSOR_PIN);
   measured_resistance = calculate_resistance(INPUT_VOLTAGE, measured_units);
+
   updateAverageResistance(measured_resistance);
-  int noteToPlay = getDynamicNoteFromResistance(measured_resistance);
+  //int noteToPlay = getDynamicNoteFromResistance(measured_resistance);
+  float difference = last_measured_resistance - measured_resistance;
+  absDifference = abs(difference);
+  int noteToPlay = getDynamicNoteFromDifference(difference);
 
     if (DEBUG_MODE) {
       Serial.print("Measured Units: ");
@@ -81,7 +90,7 @@ void loop() {
       Serial.println(noteToPlay);
   }
 
-  if (abs(last_measured_resistance - measured_resistance) > THRESHOLD){
+  if (absDifference > THRESHOLD){
       play_note(noteToPlay);
       last_measured_resistance = measured_resistance;
   }
@@ -132,7 +141,6 @@ float getAverageResistance() {
 
 int getDynamicNoteFromResistance(float resistance) {
   float averageResistance = getAverageResistance();
-
   // Adjust the note mapping based on the average resistance
   // This is just a stupid example, different kinds of mapping have great potential
   if (resistance < averageResistance * 0.8) {
@@ -148,6 +156,15 @@ int getDynamicNoteFromResistance(float resistance) {
   } else {
     return 69;
   }
+}
+
+int getDynamicNoteFromDifference(float difference){
+  float averageResitance = getAverageResistance();
+  float median_note = 64;
+  float note_per_resistance = median_note / averageResitance;
+  float interval = note_per_resistance * difference;
+  int noteToPlay = median_note + interval;
+  return noteToPlay;
 }
 
 
