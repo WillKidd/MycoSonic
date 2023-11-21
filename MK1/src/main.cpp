@@ -124,6 +124,7 @@ void updateAverageResistance(float newResistance) {
   resistanceReadings++;
 }
 
+// TODO: resistanceReadings can overflow -> gotta fix in next version
 float getAverageResistance() {
   if (resistanceReadings == 0) return 0;
   return totalResistance / resistanceReadings;
@@ -133,6 +134,7 @@ int getDynamicNoteFromResistance(float resistance) {
   float averageResistance = getAverageResistance();
 
   // Adjust the note mapping based on the average resistance
+  // This is just a stupid example, different kinds of mapping have great potential
   if (resistance < averageResistance * 0.8) {
     return 60;
   } else if (resistance < averageResistance * 1.0) {
