@@ -2,7 +2,7 @@
 #include "signal_processing.h"
 
 const int bioSensorPin = A0; // Bioelectric sensor output connected to A0
-int filterIndex = 0;         // Index of chosen filter
+int filterIndex = 5;         // Index of chosen filter
 
 void setup() {
   Serial.begin(115200); // Start serial communication at 115200 baud
@@ -29,7 +29,7 @@ void loop() {
       filteredValue = medianFilter(bioValue);
       break;
     case 5:
-      filteredValue = medianFilter(bioValue);
+      filteredValue = kalmanFilter(bioValue);
       break;
     default:
       filteredValue = bioValue;
