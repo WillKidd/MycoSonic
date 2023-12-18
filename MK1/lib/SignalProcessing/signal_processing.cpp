@@ -102,3 +102,32 @@ float kalmanFilter(float newValue) {
 
     return kalmanEstimate;
 }
+
+
+float applyFilter(int bioValue, int filterIndex) {
+  float filteredValue;
+  switch (filterIndex) {
+    case 0:
+      filteredValue = movingAverage(bioValue);
+      break;
+    case 1:
+      filteredValue = lowPassFilter(bioValue);
+      break;
+    case 2:
+      filteredValue = highPassFilter(bioValue);
+      break;
+    case 3:
+      filteredValue = notchFilter(bioValue);
+      break;
+    case 4:
+      filteredValue = medianFilter(bioValue);
+      break;
+    case 5:
+      filteredValue = kalmanFilter(bioValue);
+      break;
+    default:
+      filteredValue = bioValue;
+      break;
+  }
+  return filteredValue;
+}
