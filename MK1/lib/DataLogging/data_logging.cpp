@@ -44,3 +44,17 @@ float readDataFromSD() {
   }
 }
 
+/*
+Following link for information on the SPI pins.
+https://www.arduino.cc/reference/en/language/functions/communication/spi/
+
+
+They changed their terminology a while back, 
+most boards still have the old terminology tho:
+
+old                        <-> new
+Master In Slave Out (MISO) <-> Controller In, Peripheral Out (CIPO)
+Master Out Slave In (MOSI) <-> Controller Out Peripheral In (COPI)
+Slave Select pin (SS)      <-> Chip Select Pin (CS)
+*/
+
