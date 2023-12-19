@@ -1,47 +1,46 @@
 #include <Arduino.h>
 #include "signal_processing.h"
+#include "data_logging.h"
+
 
 const int bioSensorPin = A0; // Bioelectric sensor output connected to A0
-int filterIndex = 5;         // Index of chosen filter
+int filterIndex = -1;         // Index of chosen filter
+bool useSDCardData = true; // Whether to use SDCardData as Input
+bool logDataToSDCard = false;  // Enable or disable data logging
+
+float dataValue;
+int bioValue;
 
 void setup() {
-  Serial.begin(115200); // Start serial communication at 115200 baud
+  Serial.begin(9600); // Start serial communication at 9600 baud
+  initSDCard();
 }
 
 void loop() {
-  int bioValue = analogRead(bioSensorPin); // Read the value from the bioelectric sensor
-  float filteredValue;
-    // Apply the selected filter
-  switch (filterIndex) {
-    case 0:
-      filteredValue = movingAverage(bioValue);
-      break;
-    case 1:
-      filteredValue = lowPassFilter(bioValue);
-      break;
-    case 2:
-      filteredValue = highPassFilter(bioValue);
-      break;
-    case 3:
-      filteredValue = notchFilter(bioValue);
-      break;
-    case 4:
-      filteredValue = medianFilter(bioValue);
-      break;
-    case 5:
-      filteredValue = kalmanFilter(bioValue);
-      break;
-    default:
-      filteredValue = bioValue;
-      break;
+  if (useSDCardData && !logDataToSDCard) {
+    bioValue = readDataFromSD();
+    if (dataValue == -1) {
+      Serial.println("End of data or error reading from SD card");
+      // Handle end of data or error
+    }
+  } 
+  else {
+  bioValue = analogRead(bioSensorPin);// Read the value from the bioelectric sensor
   }
+  dataValue = applyFilter(bioValue, filterIndex); // Apply the selected filter
 
-  float voltage = (filteredValue / 1023.0) * 3.3; // Convert to voltage
+  float voltage = (dataValue / 1023.0) * 3.3; // Convert to voltage
   float milliVolts = voltage * 1000; // Convert voltage to millivolts
 
   // Format the data for output
   Serial.print(">bio_voltage:");
   Serial.println(milliVolts);
+
+   if (isSDCardAvailable() && logDataToSDCard && !useSDCardData) {
+    logData(String(bioValue));
+    Serial.print("Wrote to log: ");
+    Serial.println(bioValue);
+  }
 
   delay(10); // Wait for 10 ms
 }

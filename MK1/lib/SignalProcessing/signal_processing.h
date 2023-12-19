@@ -10,5 +10,6 @@ float highPassFilter(int newValue);
 float notchFilter(int newValue);
 float medianFilter(int newValue);
 float kalmanFilter(float newValue);
+float applyFilter(int newValue, int filterIndex);
 
 #endif
