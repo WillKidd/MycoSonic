@@ -6,9 +6,10 @@
 #include <SD.h>
 
 void initSDCard();
-bool isSDCardPresent();
+bool isSDCardAvailable();
 void logData(String data);
-float readDataFromSD();
+int readDataFromSD();
+void clearLogData();
 
 
 #endif
