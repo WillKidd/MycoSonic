@@ -4,8 +4,8 @@
 
 
 const int bioSensorPin = A0; // Bioelectric sensor output connected to A0
-int filterIndex = -1;         // Index of chosen filter
-bool useSDCardData = true; // Whether to use SDCardData as Input
+int filterIndex = 0;         // Index of chosen filter
+bool useSDCardData = false; // Whether to use SDCardData as Input
 bool logDataToSDCard = false;  // Enable or disable data logging
 
 float dataValue;
