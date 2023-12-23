@@ -27,7 +27,6 @@ bool inAdjustmentMode = false;
 
 void navigateMenu(int direction) {
     // Logic to move up or down the menu list
-    // ...
 }
 
 void selectMenuItem() {
@@ -49,22 +48,17 @@ void adjustValue(int direction) {
 
 void setup() {
     // Initialize LCD and set up inputs
-    // ...
 }
 
 void loop() {
     // Check for input
     if (inAdjustmentMode) {
         // Adjust the value of the current menu item
-        // ...
     } else {
         // Navigate through the menu
-        // ...
     }
 
     // Update the display based on the current menu item and its value
-    // ...
 }
 
 // Additional functions for menu handling and actions
-// ...
