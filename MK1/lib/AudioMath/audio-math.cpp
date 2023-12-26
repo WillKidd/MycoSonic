@@ -37,6 +37,7 @@ enum MappingType {
     MAP_TO_FULL_SPECTRUM
 };
 
+// TODO: maybe add other mapping methods for example logarithmic mapping later on
 // Function to map an input value to a note frequency
 float mapInputToFrequency(int input, int inputMin, int inputMax, const int intervals[], int numIntervals, MappingType mappingType) {
     if (mappingType == MAP_TO_FULL_SPECTRUM) {
@@ -75,3 +76,45 @@ float frequencyScale = mapInputToFrequency(sensorValue, 0, 1023, majorIntervals,
 float frequencyFullSpectrum = mapInputToFrequency(sensorValue, 0, 1023, majorIntervals, 7, MAP_TO_FULL_SPECTRUM);
 
 */
+
+/*
+// Some intervals:
+int majorIntervals[] = {2, 2, 1, 2, 2, 2, 1};
+int dorianMode[] = {2, 1, 2, 2, 2, 1, 2};
+int mixolydianMode[] = {2, 2, 1, 2, 2, 1, 2};
+int minorIntervals[] = {2, 1, 2, 2, 1, 2, 2};
+int harmonicMinorIntervals[] = {2, 1, 2, 2, 1, 3, 1};
+int melodicMinorIntervals[] = {2, 1, 2, 2, 2, 2, 1};
+int pentatonicMajorIntervals[] = {2, 2, 3, 2, 3};
+int pentatonicMinorIntervals[] = {3, 2, 2, 3, 2};
+int bluesIntervals[] = {3, 2, 1, 1, 3, 2};
+int wholeToneIntervals[] = {2, 2, 2, 2, 2, 2};
+int chromaticIntervals[] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+int lydianDominantIntervals[] = {2, 2, 2, 1, 2, 1, 2};
+int halfWholeDiminishedIntervals[] = {1, 2, 1, 2, 1, 2, 1, 2};
+int wholeHalfDiminishedIntervals[] = {2, 1, 2, 1, 2, 1, 2, 1};
+int alteredIntervals[] = {1, 2, 1, 2, 2, 2, 2};
+int bebopDominantIntervals[] = {2, 2, 1, 2, 2, 1, 1, 1};
+*/
+
+// Function to convert BPM to milliseconds
+float bpmToMilliseconds(int bpm) {
+    return 60000.0 / bpm;
+}
+
+// Function to convert a note duration to time (milliseconds)
+// noteType: The type of note (1 = whole note, 2 = half note, 4 = quarter note, etc.)
+// bpm: Beats per minute
+// beatUnit: The note value that represents one beat (bottom number in time signature)
+// defaultBeatUnit: The default note value for one beat (usually a quarter note, represented as 4)
+float noteDurationToTime(int noteType, int bpm, int beatUnit, int defaultBeatUnit = 4) {
+    float beatDuration = bpmToMilliseconds(bpm);
+
+    // Adjust the duration based on the beat unit
+    if (beatUnit != defaultBeatUnit) {
+        beatDuration *= (float(defaultBeatUnit) / beatUnit);
+    }
+
+    // Calculate the duration of the specified note type
+    return beatDuration * (4.0 / noteType);
+}

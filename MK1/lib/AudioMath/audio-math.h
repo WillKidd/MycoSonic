@@ -22,5 +22,6 @@ enum MappingType {
 float midiNoteToFrequency(int midiNumber);
 int frequencyToMIDINote(float frequency);
 float mapInputToFrequency(int input, int inputMin, int inputMax, const int intervals[], int numIntervals, MappingType mappingType);
-
+float bpmToMilliseconds(int bpm);
+float noteDurationToTime(int noteType, int bpm, int beatUnit, int defaultBeatUnit = 4);
 #endif // MIDI_MAPPING_H
