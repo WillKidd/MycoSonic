@@ -1,4 +1,4 @@
-#include <math.h>
+#include "audio-math.h"
 
 #define A4_FREQ 440.0
 #define SEMITONE_RATIO 1.059463094359 // 2^(1/12)
@@ -31,36 +31,47 @@ int frequencyToMIDINote(float frequency) {
     return midiNote;
 }
 
-// Function to generate a scale with custom intervals
-void generateScale(int rootMidiNote, const int intervals[], int size, float scaleFrequencies[]) {
-    int currentNote = rootMidiNote;
-    for(int i = 0; i < size; i++) {
-        scaleFrequencies[i] = midiNoteToFrequency(currentNote);
-        currentNote += intervals[i];
-    }
-}
+// Enum to specify the mapping type
+enum MappingType {
+    MAP_TO_SCALE,
+    MAP_TO_FULL_SPECTRUM
+};
 
-// Function to generate a scale with custom intervals across the full spectrum
-int generateFullSpectrumScale(const int intervals[], int numIntervals, float scaleNotes[]) {
-    int noteCount = 0;
+// Function to map an input value to a note frequency
+float mapInputToFrequency(int input, int inputMin, int inputMax, const int intervals[], int numIntervals, MappingType mappingType) {
+    if (mappingType == MAP_TO_FULL_SPECTRUM) {
+        // Map directly to the full MIDI spectrum
+        int midiNumber = map(input, inputMin, inputMax, MIN_MIDI_NOTE, MAX_MIDI_NOTE);
+        return midiNoteToFrequency(midiNumber);
+    } else {
+        // Map to a specific scale
+        int totalNotes = MAX_MIDI_NOTE - MIN_MIDI_NOTE + 1;
+        int spectrumPosition = map(input, inputMin, inputMax, 0, totalNotes - 1);
 
-    for (int midiNumber = MIN_MIDI_NOTE; midiNumber <= MAX_MIDI_NOTE && noteCount < MAX_SCALE_NOTES;) {
-        for (int i = 0; i < numIntervals && midiNumber <= MAX_MIDI_NOTE && noteCount < MAX_SCALE_NOTES; ++i) {
-            scaleNotes[noteCount++] = midiNoteToFrequency(midiNumber);
-            midiNumber += intervals[i];
+        int midiNumber = MIN_MIDI_NOTE;
+        while (spectrumPosition > 0) {
+            for (int i = 0; i < numIntervals && spectrumPosition > 0; ++i, --spectrumPosition) {
+                midiNumber += intervals[i % numIntervals];
+                if (midiNumber > MAX_MIDI_NOTE) {
+                    midiNumber = MIN_MIDI_NOTE + (midiNumber - MAX_MIDI_NOTE - 1);
+                }
+            }
         }
-    }
 
-    return noteCount; // Return the number of notes added to the array
+        return midiNoteToFrequency(midiNumber);
+    }
 }
 
 /*
 // Example usage:
 
-float fullSpectrumCMajor[MAX_SCALE_NOTES];
 int majorIntervals[] = {2, 2, 1, 2, 2, 2, 1}; // Intervals for a major scale
-int numNotes = generateFullSpectrumScale(majorIntervals, 7, fullSpectrumCMajor);
+int sensorValue = analogRead(A0); // Read a value from an analog sensor
 
-start is index: 0
-end is index: numNotes-1
+// Map the sensor value to a frequency in the major scale
+float frequencyScale = mapInputToFrequency(sensorValue, 0, 1023, majorIntervals, 7, MAP_TO_SCALE);
+
+// Map the sensor value to a frequency across the full MIDI spectrum
+float frequencyFullSpectrum = mapInputToFrequency(sensorValue, 0, 1023, majorIntervals, 7, MAP_TO_FULL_SPECTRUM);
+
 */

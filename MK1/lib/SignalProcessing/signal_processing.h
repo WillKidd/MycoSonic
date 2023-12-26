@@ -1,6 +1,5 @@
-// signal_processing.h
-#ifndef SignalProcessing_h
-#define SignalProcessing_h
+#ifndef SIGNAL_PROCESSING_H
+#define SIGNAL_PROCESSING_H
 
 #include <Arduino.h>
 
