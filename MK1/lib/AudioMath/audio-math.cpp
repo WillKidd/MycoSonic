@@ -37,29 +37,40 @@ enum MappingType {
     MAP_TO_FULL_SPECTRUM
 };
 
-// TODO: maybe add other mapping methods for example logarithmic mapping later on
-// Function to map an input value to a note frequency
-float mapInputToFrequency(int input, int inputMin, int inputMax, const int intervals[], int numIntervals, MappingType mappingType) {
-    if (mappingType == MAP_TO_FULL_SPECTRUM) {
-        // Map directly to the full MIDI spectrum
-        int midiNumber = map(input, inputMin, inputMax, MIN_MIDI_NOTE, MAX_MIDI_NOTE);
-        return midiNoteToFrequency(midiNumber);
-    } else {
-        // Map to a specific scale
-        int totalNotes = MAX_MIDI_NOTE - MIN_MIDI_NOTE + 1;
-        int spectrumPosition = map(input, inputMin, inputMax, 0, totalNotes - 1);
+// Function for full spectrum mapping
+float mapToFullSpectrum(int input, int inputMin, int inputMax) {
+    int midiNumber = map(input, inputMin, inputMax, MIN_MIDI_NOTE, MAX_MIDI_NOTE);
+    return midiNoteToFrequency(midiNumber);
+}
 
-        int midiNumber = MIN_MIDI_NOTE;
-        while (spectrumPosition > 0) {
-            for (int i = 0; i < numIntervals && spectrumPosition > 0; ++i, --spectrumPosition) {
-                midiNumber += intervals[i % numIntervals];
-                if (midiNumber > MAX_MIDI_NOTE) {
-                    midiNumber = MIN_MIDI_NOTE + (midiNumber - MAX_MIDI_NOTE - 1);
-                }
+// Function for scale mapping
+float mapToScale(int input, int inputMin, int inputMax, const int intervals[], int numIntervals) {
+    int totalNotes = MAX_MIDI_NOTE - MIN_MIDI_NOTE + 1;
+    int spectrumPosition = map(input, inputMin, inputMax, 0, totalNotes - 1);
+
+    int midiNumber = MIN_MIDI_NOTE;
+    while (spectrumPosition > 0) {
+        for (int i = 0; i < numIntervals && spectrumPosition > 0; ++i, --spectrumPosition) {
+            midiNumber += intervals[i % numIntervals];
+            if (midiNumber > MAX_MIDI_NOTE) {
+                midiNumber = MIN_MIDI_NOTE + (midiNumber - MAX_MIDI_NOTE - 1);
             }
         }
+    }
+    return midiNoteToFrequency(midiNumber);
+}
 
-        return midiNoteToFrequency(midiNumber);
+// Main mapping function
+float mapInputToFrequency(int input, int inputMin, int inputMax, const int intervals[], int numIntervals, MappingType mappingType) {
+    switch (mappingType) {
+        case MAP_TO_FULL_SPECTRUM:
+            return mapToFullSpectrum(input, inputMin, inputMax);
+        case MAP_TO_SCALE:
+            return mapToScale(input, inputMin, inputMax, intervals, numIntervals);
+        // Additional cases for new mapping types go here
+        default:
+            // Handle invalid mapping type
+            return -1; // or some error code
     }
 }
 
