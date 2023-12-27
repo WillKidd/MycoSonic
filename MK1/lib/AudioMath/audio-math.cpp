@@ -35,7 +35,8 @@ int frequencyToMIDINote(float frequency) {
 enum MappingType {
     MAP_TO_SCALE,
     MAP_TO_FULL_SPECTRUM,
-    DYNAMIC_RANGE_COMPRESSION
+    DYNAMIC_RANGE_COMPRESSION,
+    HARMONIC_MAPPING
 };
 
 // Function for scale mapping
@@ -70,8 +71,17 @@ float dynamicRangeCompressionMapping(int input, int inputMin, int inputMax, cons
     return mapToScale(compressedInput, inputMin, inputMax, intervals, numIntervals);
 }
 
+// Function for harmonic mapping
+float harmonicMapping(int input, int inputMin, int inputMax, float baseFrequency) {
+    // Normalize input to a harmonic index (1st, 2nd, 3rd harmonic, etc.)
+    int harmonicIndex = map(input, inputMin, inputMax, 1, 10); // Example range: 1st to 10th harmonic
+
+    // Calculate the frequency of the specified harmonic
+    return baseFrequency * harmonicIndex;
+}
+
 // Main mapping function
-float mapInputToFrequency(int input, int inputMin, int inputMax, const int intervals[], int numIntervals, MappingType mappingType) {
+float mapInputToFrequency(int input, int inputMin, int inputMax, const int intervals[], int numIntervals, MappingType mappingType, float baseFrequency = 440.0f) {
     switch (mappingType) {
         case MAP_TO_FULL_SPECTRUM:
             return mapToFullSpectrum(input, inputMin, inputMax);
@@ -79,6 +89,8 @@ float mapInputToFrequency(int input, int inputMin, int inputMax, const int inter
             return mapToScale(input, inputMin, inputMax, intervals, numIntervals);
         case DYNAMIC_RANGE_COMPRESSION:
             return dynamicRangeCompressionMapping(input, inputMin, inputMax, intervals, numIntervals);
+        case HARMONIC_MAPPING:
+            return harmonicMapping(input, inputMin, inputMax, baseFrequency);
         // Additional cases for new mapping types go here
         default:
             // Handle invalid mapping type
