@@ -34,14 +34,9 @@ int frequencyToMIDINote(float frequency) {
 // Enum to specify the mapping type
 enum MappingType {
     MAP_TO_SCALE,
-    MAP_TO_FULL_SPECTRUM
+    MAP_TO_FULL_SPECTRUM,
+    DYNAMIC_RANGE_COMPRESSION
 };
-
-// Function for full spectrum mapping
-float mapToFullSpectrum(int input, int inputMin, int inputMax) {
-    int midiNumber = map(input, inputMin, inputMax, MIN_MIDI_NOTE, MAX_MIDI_NOTE);
-    return midiNoteToFrequency(midiNumber);
-}
 
 // Function for scale mapping
 float mapToScale(int input, int inputMin, int inputMax, const int intervals[], int numIntervals) {
@@ -60,6 +55,21 @@ float mapToScale(int input, int inputMin, int inputMax, const int intervals[], i
     return midiNoteToFrequency(midiNumber);
 }
 
+// Function for full spectrum mapping
+float mapToFullSpectrum(int input, int inputMin, int inputMax) {
+    int midiNumber = map(input, inputMin, inputMax, MIN_MIDI_NOTE, MAX_MIDI_NOTE);
+    return midiNoteToFrequency(midiNumber);
+}
+
+// Function for dynamic range compression mapping
+float dynamicRangeCompressionMapping(int input, int inputMin, int inputMax, const int intervals[], int numIntervals) {
+    // Apply compression to the input
+    float compressedInput = log10(input - inputMin + 1) / log10(inputMax - inputMin + 1) * (inputMax - inputMin);
+
+    // Now map this compressed input to a scale
+    return mapToScale(compressedInput, inputMin, inputMax, intervals, numIntervals);
+}
+
 // Main mapping function
 float mapInputToFrequency(int input, int inputMin, int inputMax, const int intervals[], int numIntervals, MappingType mappingType) {
     switch (mappingType) {
@@ -67,6 +77,8 @@ float mapInputToFrequency(int input, int inputMin, int inputMax, const int inter
             return mapToFullSpectrum(input, inputMin, inputMax);
         case MAP_TO_SCALE:
             return mapToScale(input, inputMin, inputMax, intervals, numIntervals);
+        case DYNAMIC_RANGE_COMPRESSION:
+            return dynamicRangeCompressionMapping(input, inputMin, inputMax, intervals, numIntervals);
         // Additional cases for new mapping types go here
         default:
             // Handle invalid mapping type
