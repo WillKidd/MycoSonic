@@ -24,4 +24,4 @@ int frequencyToMIDINote(float frequency);
 float mapInputToFrequency(int input, int inputMin, int inputMax, const int intervals[], int numIntervals, MappingType mappingType);
 float bpmToMilliseconds(int bpm);
 float noteDurationToTime(int noteType, int bpm, int beatUnit, int defaultBeatUnit);
-#endif // MIDI_MAPPING_H
+#endif
