@@ -25,6 +25,9 @@ int breakDurationType = 8; // Eighth note
 float noteDuration; // Duration of a note in milliseconds
 float breakDuration; // Duration of a break in milliseconds
 
+BaseWaveform* currentWaveform = nullptr;
+int currentFrequency = 220;
+
 enum State { PLAYING, BREAK };
 State currentState = PLAYING;
 
@@ -32,8 +35,7 @@ void setup() {
   Serial.begin(9600);
   initSDCard();
   startMozzi(64);
-  initializeSineWave(220);
-
+  currentWaveform = new SineWave(currentFrequency);
   // Calculate durations based on user-set values
   noteDuration = noteDurationToTime(noteDurationType, bpm, beatUnit, defaultBeatUnit);
   breakDuration = 0.0;
@@ -52,7 +54,7 @@ void updateControl(){
   switch (currentState) {
     case PLAYING:
       if (currentTime - lastChangeTime >= noteDuration) {
-        setSineWaveFrequency(0); // Silence the output for a break
+        currentWaveform->setFrequency(0); // Silence the output for a break
         currentState = BREAK;
         lastChangeTime = currentTime;
       }
@@ -62,7 +64,7 @@ void updateControl(){
         bioValue = analogRead(bioSensorPin);
         dataValue = applyFilter(bioValue, filterIndex);
         float freq = harmonicMapping(dataValue, 0, 1023, 110);
-        setSineWaveFrequency(freq);
+        currentWaveform->setFrequency(freq);
         currentState = PLAYING;
         lastChangeTime = currentTime;
       }
@@ -71,6 +73,6 @@ void updateControl(){
 }
 
 int updateAudio(){
-  return updateSineWave();
+  return currentWaveform->update();
 }
 
