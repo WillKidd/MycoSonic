@@ -135,7 +135,7 @@ float millisecondsPerBeat(int bpm) {
 // defaultBeatUnit: The default note value for one beat (usually a quarter note, represented as 4)
 
 float noteDurationToTime(int noteType, int bpm, int beatUnit, int defaultBeatUnit = 4) {
-    float beatDuration = bpmToMilliseconds(bpm);
+    float beatDuration = millisecondsPerBeat(bpm);
 
     // Adjust the duration based on the beat unit
     if (beatUnit != defaultBeatUnit) {
@@ -147,7 +147,7 @@ float noteDurationToTime(int noteType, int bpm, int beatUnit, int defaultBeatUni
 }
 
 float noteDurationToTimeFractional(float noteTypeRatio, int bpm, int beatUnit, int defaultBeatUnit = 4) {
-    float beatDuration = bpmToMilliseconds(bpm);
+    float beatDuration = millisecondsPerBeat(bpm);
 
     // Adjust the duration based on the beat unit
     if (beatUnit != defaultBeatUnit) {
