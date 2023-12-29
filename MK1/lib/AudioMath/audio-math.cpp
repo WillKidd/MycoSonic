@@ -31,14 +31,6 @@ int frequencyToMIDINote(float frequency) {
     return midiNote;
 }
 
-// Enum to specify the mapping type
-enum MappingType {
-    MAP_TO_SCALE,
-    MAP_TO_FULL_SPECTRUM,
-    DYNAMIC_RANGE_COMPRESSION,
-    HARMONIC_MAPPING
-};
-
 // Function for scale mapping
 float mapToScale(int input, int inputMin, int inputMax, const int intervals[], int numIntervals) {
     int totalNotes = MAX_MIDI_NOTE - MIN_MIDI_NOTE + 1;
@@ -132,9 +124,8 @@ int alteredIntervals[] = {1, 2, 1, 2, 2, 2, 2};
 int bebopDominantIntervals[] = {2, 2, 1, 2, 2, 1, 1, 1};
 */
 
-// Function to convert BPM to milliseconds
 float bpmToMilliseconds(int bpm) {
-    return 60000.0 / bpm;
+  return (60000 * (float)bpm) / 1000;
 }
 
 // Function to convert a note duration to time (milliseconds)
@@ -142,6 +133,7 @@ float bpmToMilliseconds(int bpm) {
 // bpm: Beats per minute
 // beatUnit: The note value that represents one beat (bottom number in time signature)
 // defaultBeatUnit: The default note value for one beat (usually a quarter note, represented as 4)
+
 float noteDurationToTime(int noteType, int bpm, int beatUnit, int defaultBeatUnit = 4) {
     float beatDuration = bpmToMilliseconds(bpm);
 
@@ -153,3 +145,17 @@ float noteDurationToTime(int noteType, int bpm, int beatUnit, int defaultBeatUni
     // Calculate the duration of the specified note type
     return beatDuration * (4.0 / noteType);
 }
+
+float noteDurationToTimeFractional(float noteTypeRatio, int bpm, int beatUnit, int defaultBeatUnit = 4) {
+    float beatDuration = bpmToMilliseconds(bpm);
+
+    // Adjust the duration based on the beat unit
+    if (beatUnit != defaultBeatUnit) {
+        beatDuration *= (float(defaultBeatUnit) / beatUnit);
+    }
+
+    // Calculate the duration of the specified note type
+    return beatDuration * noteTypeRatio;
+}
+
+

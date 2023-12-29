@@ -30,4 +30,5 @@ float harmonicMapping(int input, int inputMin, int inputMax, float baseFrequency
 float mapInputToFrequency(int input, int inputMin, int inputMax, const int intervals[], int numIntervals, MappingType mappingType, float baseFrequency);
 float bpmToMilliseconds(int bpm);
 float noteDurationToTime(int noteType, int bpm, int beatUnit, int defaultBeatUnit);
+float noteDurationToTimeFractional(float noteTypeRatio, int bpm, int beatUnit, int defaultBeatUnit);
 #endif
