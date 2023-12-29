@@ -49,7 +49,7 @@ int SawWave::update() {
 }
 
 void SawWave::setFrequency(int frequency) {
-    squarewaveOscillator.setFreq(frequency);
+    sawwaveOscillator.setFreq(frequency);
 }
 
 Oscil<SAW2048_NUM_CELLS, AUDIO_RATE> SawWave::getOscillator(){
@@ -97,4 +97,35 @@ void switchWaveform(int waveformType) {
         default:
             currentWaveform = new SineWave(currentFrequency); 
     }
+}
+
+Echo::Echo(int bufferSize, float echoVolume)
+    : bufferSize(bufferSize), currentEchoVolume(echoVolume),
+      delayIndex(0), currentDelayLength(bufferSize / 2),
+      echoEnabled(true) {
+    delayBuffer = new int[bufferSize]();
+}
+
+void Echo::setDelayLength(int delayLength) {
+    currentDelayLength = delayLength % bufferSize;
+}
+
+void Echo::setEchoVolume(float echoVolume) {
+    currentEchoVolume = echoVolume;
+}
+
+void Echo::enableEcho(bool enable) {
+    echoEnabled = enable;
+}
+
+int Echo::process(int inputSample) {
+    if (!echoEnabled) {
+        return inputSample;
+    }
+
+    int readIndex = (delayIndex - currentDelayLength + bufferSize) % bufferSize;
+    int delayedSample = delayBuffer[readIndex];
+    delayBuffer[delayIndex] = inputSample;
+    delayIndex = (delayIndex + 1) % bufferSize;
+    return inputSample + (int)(delayedSample * currentEchoVolume);
 }

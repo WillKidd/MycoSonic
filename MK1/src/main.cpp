@@ -20,33 +20,32 @@ int defaultBeatUnit = 4; // Default beat unit for the time signature
 
 // User-settable note and break durations (as note types, e.g., 4 for quarter note)
 int noteDurationType = 4; // Quarter note
-int breakDurationType = 8; // Eighth note
+int breakDurationType = 4; // Quarter note
 
 float noteDuration; // Duration of a note in milliseconds
 float breakDuration; // Duration of a break in milliseconds
 
-BaseWaveform* currentWaveform = nullptr;
-int currentFrequency = 220;
-
 enum State { PLAYING, BREAK };
 State currentState = PLAYING;
+
+BaseWaveform* currentWaveform = nullptr;
+int currentFrequency = 220;
 
 void setup() {
   Serial.begin(9600);
   initSDCard();
   startMozzi(64);
-  currentWaveform = new SineWave(currentFrequency);
   // Calculate durations based on user-set values
   noteDuration = noteDurationToTime(noteDurationType, bpm, beatUnit, defaultBeatUnit);
-  breakDuration = 0.0;
-  //breakDuration = noteDurationToTime(breakDurationType, bpm, beatUnit, defaultBeatUnit);
+  //breakDuration = 0.0;
+  breakDuration = noteDurationToTime(breakDurationType, bpm, beatUnit, defaultBeatUnit);
 
+  currentWaveform = new SawWave(currentFrequency);
   lastChangeTime = millis();
 }
 
 void loop(){
   audioHook();
-  updateControl();
 }
 
 void updateControl(){

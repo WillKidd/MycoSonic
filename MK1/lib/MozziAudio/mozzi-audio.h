@@ -50,4 +50,22 @@ public:
 
 void switchWaveform(int waveformType);
 
+class Echo {
+public:
+    Echo(int bufferSize, float echoVolume);
+    void enableEcho(bool enable);
+    void setDelayLength(int delayLength);
+    void setEchoVolume(float echoVolume);
+    int process(int inputSample);
+
+private:
+    int* delayBuffer;
+    int bufferSize;
+    float currentEchoVolume;
+    int delayIndex;
+    int currentDelayLength;
+    bool echoEnabled;
+};
+
+
 #endif // MOZZI_AUDIO_H
