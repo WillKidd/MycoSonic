@@ -124,8 +124,8 @@ int alteredIntervals[] = {1, 2, 1, 2, 2, 2, 2};
 int bebopDominantIntervals[] = {2, 2, 1, 2, 2, 1, 1, 1};
 */
 
-float bpmToMilliseconds(int bpm) {
-  return (60000 * (float)bpm) / 1000;
+float millisecondsPerBeat(int bpm) {
+  return 60000 / float(bpm);
 }
 
 // Function to convert a note duration to time (milliseconds)
