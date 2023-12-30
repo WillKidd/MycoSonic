@@ -50,22 +50,34 @@ public:
 
 void switchWaveform(int waveformType);
 
-class Echo {
+
+class PhaseModulationEffect {
 public:
-    Echo(int bufferSize, float echoVolume);
-    void enableEcho(bool enable);
-    void setDelayLength(int delayLength);
-    void setEchoVolume(float echoVolume);
-    int process(int inputSample);
+    PhaseModulationEffect(float lfoRate, float modulationDepth);
+
+    void updateLFO();
+    int applyEffect(int inputSample);
+    void setEffectEnabled(bool enabled);
 
 private:
-    int* delayBuffer;
-    int bufferSize;
-    float currentEchoVolume;
-    int delayIndex;
-    int currentDelayLength;
-    bool echoEnabled;
+    float lfoRate;
+    float modulationDepth;
+    float lfoPhase;
+    bool effectEnabled;  // New member variable to store the effect's state
 };
 
+class TremoloEffect {
+public:
+    TremoloEffect(float rate, float depth);
+    void updateLFO();
+    int applyEffect(int inputSample);
+    void enableEffect(bool enable);
+
+private:
+    float rate;  // Speed of the tremolo modulation
+    float depth; // Depth of the tremolo effect
+    float lfoPhase;
+    bool effectEnabled;
+};
 
 #endif // MOZZI_AUDIO_H

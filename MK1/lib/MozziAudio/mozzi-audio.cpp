@@ -99,33 +99,46 @@ void switchWaveform(int waveformType) {
     }
 }
 
-Echo::Echo(int bufferSize, float echoVolume)
-    : bufferSize(bufferSize), currentEchoVolume(echoVolume),
-      delayIndex(0), currentDelayLength(bufferSize / 2),
-      echoEnabled(true) {
-    delayBuffer = new int[bufferSize]();
+
+PhaseModulationEffect::PhaseModulationEffect(float lfoRate, float modulationDepth)
+    : lfoRate(lfoRate), modulationDepth(modulationDepth), lfoPhase(0) {}
+
+void PhaseModulationEffect::updateLFO() {
+    lfoPhase += lfoRate / AUDIO_RATE; 
+    if (lfoPhase > 1.0) {
+        lfoPhase -= 1.0;
+    }
 }
 
-void Echo::setDelayLength(int delayLength) {
-    currentDelayLength = delayLength % bufferSize;
-}
-
-void Echo::setEchoVolume(float echoVolume) {
-    currentEchoVolume = echoVolume;
-}
-
-void Echo::enableEcho(bool enable) {
-    echoEnabled = enable;
-}
-
-int Echo::process(int inputSample) {
-    if (!echoEnabled) {
+int PhaseModulationEffect::applyEffect(int inputSample) {
+    if (!effectEnabled){
         return inputSample;
     }
+    float modulation = sin(lfoPhase * 2 * PI) * modulationDepth;
+    return static_cast<int>(inputSample * (1 + modulation));
+}
 
-    int readIndex = (delayIndex - currentDelayLength + bufferSize) % bufferSize;
-    int delayedSample = delayBuffer[readIndex];
-    delayBuffer[delayIndex] = inputSample;
-    delayIndex = (delayIndex + 1) % bufferSize;
-    return inputSample + (int)(delayedSample * currentEchoVolume);
+void PhaseModulationEffect::setEffectEnabled(bool enabled){
+    effectEnabled = enabled;
+}
+
+TremoloEffect::TremoloEffect(float rate, float depth)
+    : rate(rate), depth(depth), lfoPhase(0), effectEnabled(true) {}
+
+void TremoloEffect::updateLFO() {
+    lfoPhase += rate / AUDIO_RATE;
+    if (lfoPhase > 1) lfoPhase -= 1;
+}
+
+int TremoloEffect::applyEffect(int inputSample) {
+    if (!effectEnabled) {
+        return inputSample;
+    }
+    float lfoValue = (sin(lfoPhase * 2 * PI) + 1) / 2;  // Normalized to 0 to 1
+    float modulation = 1 - (depth * lfoValue);
+    return static_cast<int>(inputSample * modulation);
+}
+
+void TremoloEffect::enableEffect(bool enable) {
+    effectEnabled = enable;
 }
