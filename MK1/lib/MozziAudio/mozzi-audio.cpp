@@ -249,3 +249,27 @@ int PitchShifterEffect::applyEffect(int inputSample) {
 void PitchShifterEffect::enableEffect(bool enable) {
     effectEnabled = enable;
 }
+
+DistortionEffect::DistortionEffect(float gain, float threshold)
+    : gain(gain), threshold(threshold), effectEnabled(true) {}
+
+int DistortionEffect::applyEffect(int inputSample) {
+    if (!effectEnabled) {
+        return inputSample;
+    }
+
+    float amplifiedSample = inputSample * gain;
+
+    // Clipping
+    if (amplifiedSample > threshold) {
+        amplifiedSample = threshold;
+    } else if (amplifiedSample < -threshold) {
+        amplifiedSample = -threshold;
+    }
+
+    return static_cast<int>(amplifiedSample);
+}
+
+void DistortionEffect::enableEffect(bool enable) {
+    effectEnabled = enable;
+}

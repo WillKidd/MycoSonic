@@ -138,4 +138,16 @@ private:
     bool effectEnabled;
 };
 
+class DistortionEffect {
+public:
+    DistortionEffect(float gain, float threshold);
+    int applyEffect(int inputSample);
+    void enableEffect(bool enable);
+
+private:
+    float gain;       // Gain factor to increase signal amplitude
+    float threshold;  // Threshold for clipping
+    bool effectEnabled;
+};
+
 #endif // MOZZI_AUDIO_H
