@@ -273,3 +273,107 @@ int DistortionEffect::applyEffect(int inputSample) {
 void DistortionEffect::enableEffect(bool enable) {
     effectEnabled = enable;
 }
+
+WahWahEffect::WahWahEffect(float lfoRate, float depth, float centerFrequency, float qFactor)
+    : lfoRate(lfoRate), depth(depth), centerFrequency(centerFrequency), qFactor(qFactor), lfoPhase(0), effectEnabled(true) {}
+
+int WahWahEffect::applyEffect(int inputSample) {
+    if (!effectEnabled) {
+        return inputSample;
+    }
+
+    // Update the LFO phase
+    lfoPhase += lfoRate / AUDIO_RATE;
+    if (lfoPhase > 1) lfoPhase -= 1;
+
+    // Calculate the current frequency of the filter
+    float frequencySweep = depth * sin(lfoPhase * 2 * PI);
+    float currentFrequency = centerFrequency + frequencySweep;
+
+    // Apply the filter (simplified for now, real implementation might require a more complex filter design)
+    // For a real filter, implement a band-pass filter here
+    // Currently will just modulate the sample value for demonstration purpose
+    float modulatedSample = inputSample * (1 + frequencySweep);
+
+    return static_cast<int>(modulatedSample);
+}
+
+void WahWahEffect::enableEffect(bool enable) {
+    effectEnabled = enable;
+}
+
+PanEffect::PanEffect(float lfoRate)
+    : lfoRate(lfoRate), lfoPhase(0), effectEnabled(true) {}
+
+void PanEffect::applyEffect(int& leftChannel, int& rightChannel) {
+    if (!effectEnabled) {
+        return;
+    }
+
+    // Update LFO phase
+    lfoPhase += lfoRate / AUDIO_RATE;
+    if (lfoPhase > 1) lfoPhase -= 1;
+
+    // Calculate panning value (from -1 to 1)
+    float pan = sin(lfoPhase * 2 * PI);
+
+    // Adjust the left and right channels based on the panning value
+    float leftGain = pan <= 0 ? 1 : 1 - pan;
+    float rightGain = pan >= 0 ? 1 : 1 + pan;
+
+    leftChannel = static_cast<int>(leftChannel * leftGain);
+    rightChannel = static_cast<int>(rightChannel * rightGain);
+}
+
+void PanEffect::enableEffect(bool enable) {
+    effectEnabled = enable;
+}
+
+VibratoEffect::VibratoEffect(float depth, float rate)
+    : depth(depth), rate(rate), lfoPhase(0), effectEnabled(true) {}
+
+int VibratoEffect::applyEffect(int inputSample) {
+    if (!effectEnabled) {
+        return inputSample;
+    }
+
+    // Update LFO phase
+    lfoPhase += rate / AUDIO_RATE;
+    if (lfoPhase > 1) lfoPhase -= 1;
+
+    // Modulate the pitch using the LFO
+    float vibrato = sin(lfoPhase * 2 * PI) * depth;
+
+    // For a real implementation, you would need to adjust the sample rate or use a pitch-shifting algorithm
+    // Here, we'll simulate it by simply modulating the sample value
+    int modulatedSample = static_cast<int>(inputSample * (1 + vibrato));
+
+    return modulatedSample;
+}
+
+void VibratoEffect::enableEffect(bool enable) {
+    effectEnabled = enable;
+}
+
+LeslieEffect::LeslieEffect(float speed)
+    : speed(speed), phase(0), effectEnabled(true) {}
+
+int LeslieEffect::applyEffect(int inputSample) {
+    if (!effectEnabled) {
+        return inputSample;
+    }
+
+    // Update phase
+    phase += speed / AUDIO_RATE;
+    if (phase > 1) phase -= 1;
+
+    // Modulate the sound
+    float modulation = sin(phase * 2 * PI);
+    int modulatedSample = static_cast<int>(inputSample * (1 + modulation));
+
+    return modulatedSample;
+}
+
+void LeslieEffect::enableEffect(bool enable) {
+    effectEnabled = enable;
+}

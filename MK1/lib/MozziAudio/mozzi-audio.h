@@ -150,4 +150,56 @@ private:
     bool effectEnabled;
 };
 
+class WahWahEffect {
+public:
+    WahWahEffect(float lfoRate, float depth, float centerFrequency, float qFactor);
+    int applyEffect(int inputSample);
+    void enableEffect(bool enable);
+
+private:
+    float lfoRate;          // Rate of the LFO that controls the filter sweep
+    float depth;            // Depth of the filter sweep
+    float centerFrequency;  // Center frequency around which the filter sweeps
+    float qFactor;          // Quality factor of the filter
+    float lfoPhase;
+    bool effectEnabled;
+};
+
+class PanEffect {
+public:
+    PanEffect(float lfoRate);
+    void applyEffect(int& leftChannel, int& rightChannel);
+    void enableEffect(bool enable);
+
+private:
+    float lfoRate;  // Rate of the LFO for auto-panning
+    float lfoPhase;
+    bool effectEnabled;
+};
+
+class VibratoEffect {
+public:
+    VibratoEffect(float depth, float rate);
+    int applyEffect(int inputSample);
+    void enableEffect(bool enable);
+
+private:
+    float depth;     // Depth of the pitch modulation
+    float rate;      // Rate of the LFO for pitch modulation
+    float lfoPhase;
+    bool effectEnabled;
+};
+
+class LeslieEffect {
+public:
+    LeslieEffect(float speed);
+    int applyEffect(int inputSample);
+    void enableEffect(bool enable);
+
+private:
+    float speed;     // Speed of the Leslie speaker rotation
+    float phase;     // Current phase of the rotation
+    bool effectEnabled;
+};
+
 #endif // MOZZI_AUDIO_H
