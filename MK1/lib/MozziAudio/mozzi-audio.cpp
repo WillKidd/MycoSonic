@@ -219,3 +219,33 @@ int FlangerEffect::applyEffect(int inputSample) {
 void FlangerEffect::enableEffect(bool enable) {
     effectEnabled = enable;
 }
+
+PitchShifterEffect::PitchShifterEffect(float pitchShiftFactor)
+    : pitchShiftFactor(pitchShiftFactor), readIndex(0), writeIndex(0), effectEnabled(true) {
+    memset(delayBuffer, 0, sizeof(delayBuffer));
+}
+
+int PitchShifterEffect::applyEffect(int inputSample) {
+    if (!effectEnabled) {
+        return inputSample;
+    }
+
+    // Store the current sample in the buffer
+    delayBuffer[writeIndex] = inputSample;
+
+    // Calculate the read index
+    readIndex = writeIndex - static_cast<int>(pitchShiftFactor * PITCH_BUFFER_SIZE);
+    if (readIndex < 0) readIndex += PITCH_BUFFER_SIZE;
+
+    // Read the shifted sample
+    int shiftedSample = delayBuffer[readIndex];
+
+    // Update the write index
+    writeIndex = (writeIndex + 1) % PITCH_BUFFER_SIZE;
+
+    return shiftedSample;
+}
+
+void PitchShifterEffect::enableEffect(bool enable) {
+    effectEnabled = enable;
+}

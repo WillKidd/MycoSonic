@@ -122,4 +122,20 @@ private:
     bool effectEnabled;
 };
 
+class PitchShifterEffect {
+public:
+    PitchShifterEffect(float pitchShiftFactor);
+    int applyEffect(int inputSample);
+    void enableEffect(bool enable);
+
+private:
+    static constexpr float MAX_DELAY_MS = 10.0f;   // Maximum delay in milliseconds
+    static const int PITCH_BUFFER_SIZE = static_cast<int>(AUDIO_RATE * MAX_DELAY_MS / 1000);
+    float pitchShiftFactor; // Factor to shift pitch by
+    int readIndex;          // Current read index in the buffer
+    int writeIndex;         // Current write index in the buffer
+    int delayBuffer[PITCH_BUFFER_SIZE]; // Buffer to store samples
+    bool effectEnabled;
+};
+
 #endif // MOZZI_AUDIO_H
