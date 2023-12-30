@@ -185,3 +185,37 @@ int RingModulatorEffect::applyEffect(int inputSample) {
 void RingModulatorEffect::enableEffect(bool enable) {
     effectEnabled = enable;
 }
+
+FlangerEffect::FlangerEffect(float maxDelayMs, float rate)
+    : maxDelayMs(maxDelayMs), rate(rate), lfoPhase(0), bufferIndex(0), effectEnabled(true) {
+    memset(delayBuffer, 0, sizeof(delayBuffer));
+}
+
+int FlangerEffect::applyEffect(int inputSample) {
+    if (!effectEnabled) {
+        return inputSample;
+    }
+
+    // Update LFO phase
+    lfoPhase += rate / AUDIO_RATE;
+    if (lfoPhase > 1) lfoPhase -= 1;
+
+    // Calculate delay offset
+    float lfoValue = (sin(lfoPhase * 2 * PI) + 1) / 2;  // Normalized to 0-1
+    int delayOffset = static_cast<int>(lfoValue * maxDelayMs * AUDIO_RATE / 1000);
+
+    // Add delayed sample to input sample
+    int delayedSampleIndex = bufferIndex - delayOffset;
+    if (delayedSampleIndex < 0) delayedSampleIndex += DELAY_BUFFER_SIZE;
+    int outputSample = (inputSample + delayBuffer[delayedSampleIndex]) / 2;
+
+    // Update delay buffer
+    delayBuffer[bufferIndex] = inputSample;
+    bufferIndex = (bufferIndex + 1) % DELAY_BUFFER_SIZE;
+
+    return outputSample;
+}
+
+void FlangerEffect::enableEffect(bool enable) {
+    effectEnabled = enable;
+}

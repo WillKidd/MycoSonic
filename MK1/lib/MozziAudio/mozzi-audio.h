@@ -106,4 +106,20 @@ private:
     bool effectEnabled;
 };
 
+class FlangerEffect {
+public:
+    FlangerEffect(float maxDelayMs, float rate);
+    int applyEffect(int inputSample);
+    void enableEffect(bool enable);
+private:
+    static constexpr float MAX_DELAY_MS = 10.0f;   // Maximum delay in milliseconds
+    static const int DELAY_BUFFER_SIZE = static_cast<int>(AUDIO_RATE * MAX_DELAY_MS / 1000);
+    float maxDelayMs;  // Maximum delay in milliseconds
+    float rate;        // Rate of LFO
+    float lfoPhase;
+    int delayBuffer[DELAY_BUFFER_SIZE]; // Buffer for delayed samples
+    int bufferIndex;
+    bool effectEnabled;
+};
+
 #endif // MOZZI_AUDIO_H
