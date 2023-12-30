@@ -99,7 +99,6 @@ void switchWaveform(int waveformType) {
     }
 }
 
-
 PhaseModulationEffect::PhaseModulationEffect(float lfoRate, float modulationDepth)
     : lfoRate(lfoRate), modulationDepth(modulationDepth), lfoPhase(0) {}
 
@@ -140,5 +139,26 @@ int TremoloEffect::applyEffect(int inputSample) {
 }
 
 void TremoloEffect::enableEffect(bool enable) {
+    effectEnabled = enable;
+}
+
+BitCrusherEffect::BitCrusherEffect(float bitDepth, float reducedSampleRate)
+    : bitDepth(bitDepth), reducedSampleRate(reducedSampleRate), effectEnabled(true), lastSampleTime(0), lastSample(0) {}
+
+int BitCrusherEffect::applyEffect(int inputSample) {
+    if (!effectEnabled) {
+        return inputSample;
+    }
+    
+    unsigned long currentTime = micros();
+    if (currentTime - lastSampleTime > 1000000 / reducedSampleRate) {
+        lastSampleTime = currentTime;
+        lastSample = inputSample & (~((1 << (16 - static_cast<int>(bitDepth))) - 1));
+    }
+
+    return lastSample;
+}
+
+void BitCrusherEffect::enableEffect(bool enable) {
     effectEnabled = enable;
 }

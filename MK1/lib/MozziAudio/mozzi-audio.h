@@ -80,4 +80,18 @@ private:
     bool effectEnabled;
 };
 
+class BitCrusherEffect {
+public:
+    BitCrusherEffect(float bitDepth, float reducedSampleRate);
+    int applyEffect(int inputSample);
+    void enableEffect(bool enable);
+
+private:
+    float bitDepth;          // Desired bit depth
+    float reducedSampleRate; // Reduced sample rate
+    bool effectEnabled;
+    unsigned long lastSampleTime;
+    int lastSample;
+};
+
 #endif // MOZZI_AUDIO_H
