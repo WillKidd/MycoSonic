@@ -94,4 +94,16 @@ private:
     int lastSample;
 };
 
+class RingModulatorEffect {
+public:
+    RingModulatorEffect(float carrierFrequency);
+    int applyEffect(int inputSample);
+    void enableEffect(bool enable);
+
+private:
+    float carrierFrequency; // Frequency of the carrier wave
+    float carrierPhase;
+    bool effectEnabled;
+};
+
 #endif // MOZZI_AUDIO_H

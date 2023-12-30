@@ -162,3 +162,26 @@ int BitCrusherEffect::applyEffect(int inputSample) {
 void BitCrusherEffect::enableEffect(bool enable) {
     effectEnabled = enable;
 }
+
+RingModulatorEffect::RingModulatorEffect(float carrierFrequency)
+    : carrierFrequency(carrierFrequency), carrierPhase(0), effectEnabled(true) {}
+
+int RingModulatorEffect::applyEffect(int inputSample) {
+    if (!effectEnabled) {
+        return inputSample;
+    }
+
+    // Update the carrier phase
+    carrierPhase += (2 * PI * carrierFrequency) / AUDIO_RATE;
+    if (carrierPhase > 2 * PI) {
+        carrierPhase -= 2 * PI;
+    }
+
+    // Apply ring modulation effect
+    float carrierSignal = sin(carrierPhase);
+    return static_cast<int>(inputSample * carrierSignal);
+}
+
+void RingModulatorEffect::enableEffect(bool enable) {
+    effectEnabled = enable;
+}
