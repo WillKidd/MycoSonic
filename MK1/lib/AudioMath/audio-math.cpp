@@ -31,21 +31,22 @@ int frequencyToMIDINote(float frequency) {
     return midiNote;
 }
 
-// Function for scale mapping
-float mapToScale(int input, int inputMin, int inputMax, const int intervals[], int numIntervals) {
-    int totalNotes = MAX_MIDI_NOTE - MIN_MIDI_NOTE + 1;
-    int spectrumPosition = map(input, inputMin, inputMax, 0, totalNotes - 1);
+// Function to map input to a scale in a certain key
+float mapToScale(int input, int inputMin, int inputMax, int keyRootMidiNote, const int intervals[], int numIntervals) {
+    int totalRange = MAX_MIDI_NOTE - MIN_MIDI_NOTE + 1;
+    int totalNotesInScale = (totalRange / numIntervals) * numIntervals;
 
-    int midiNumber = MIN_MIDI_NOTE;
-    while (spectrumPosition > 0) {
-        for (int i = 0; i < numIntervals && spectrumPosition > 0; ++i, --spectrumPosition) {
-            midiNumber += intervals[i % numIntervals];
-            if (midiNumber > MAX_MIDI_NOTE) {
-                midiNumber = MIN_MIDI_NOTE + (midiNumber - MAX_MIDI_NOTE - 1);
-            }
+    int scaledInput = map(input, inputMin, inputMax, 0, totalNotesInScale - 1);
+
+    int midiNote = keyRootMidiNote;
+    for (int i = 0; i <= scaledInput; ++i) {
+        midiNote += intervals[i % numIntervals];
+        if (midiNote > MAX_MIDI_NOTE) {
+            midiNote = MIN_MIDI_NOTE + (midiNote - MAX_MIDI_NOTE - 1) % totalRange;
         }
     }
-    return midiNoteToFrequency(midiNumber);
+    
+    return midiNoteToFrequency(midiNote);
 }
 
 // Function for full spectrum mapping
@@ -71,38 +72,6 @@ float harmonicMapping(int input, int inputMin, int inputMax, float baseFrequency
     // Calculate the frequency of the specified harmonic
     return baseFrequency * harmonicIndex;
 }
-
-// Main mapping function
-float mapInputToFrequency(int input, int inputMin, int inputMax, const int intervals[], int numIntervals, MappingType mappingType, float baseFrequency = 440.0f) {
-    switch (mappingType) {
-        case MAP_TO_FULL_SPECTRUM:
-            return mapToFullSpectrum(input, inputMin, inputMax);
-        case MAP_TO_SCALE:
-            return mapToScale(input, inputMin, inputMax, intervals, numIntervals);
-        case DYNAMIC_RANGE_COMPRESSION:
-            return dynamicRangeCompressionMapping(input, inputMin, inputMax, intervals, numIntervals);
-        case HARMONIC_MAPPING:
-            return harmonicMapping(input, inputMin, inputMax, baseFrequency);
-        // Additional cases for new mapping types go here
-        default:
-            // Handle invalid mapping type
-            return -1; // or some error code
-    }
-}
-
-/*
-// Example usage:
-
-int majorIntervals[] = {2, 2, 1, 2, 2, 2, 1}; // Intervals for a major scale
-int sensorValue = analogRead(A0); // Read a value from an analog sensor
-
-// Map the sensor value to a frequency in the major scale
-float frequencyScale = mapInputToFrequency(sensorValue, 0, 1023, majorIntervals, 7, MAP_TO_SCALE);
-
-// Map the sensor value to a frequency across the full MIDI spectrum
-float frequencyFullSpectrum = mapInputToFrequency(sensorValue, 0, 1023, majorIntervals, 7, MAP_TO_FULL_SPECTRUM);
-
-*/
 
 /*
 // Some intervals:
