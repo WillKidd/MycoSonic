@@ -1,46 +1,77 @@
 #include <Arduino.h>
 #include "signal_processing.h"
 #include "data_logging.h"
+#include "mozzi-audio.h"
+#include "audio-math.h"
 
-
-const int bioSensorPin = A0; // Bioelectric sensor output connected to A0
-int filterIndex = -1;         // Index of chosen filter
-bool useSDCardData = true; // Whether to use SDCardData as Input
-bool logDataToSDCard = false;  // Enable or disable data logging
+const int bioSensorPin = A0;
+int filterIndex = 0;
+bool useSDCardData = false;
+bool logDataToSDCard = false;
 
 float dataValue;
 int bioValue;
 
+unsigned long lastChangeTime;
+bool isNotePlaying = true;
+int bpm = 120; // Example BPM
+int beatUnit = 4; // Assuming 4/4 time signature
+int defaultBeatUnit = 4; // Default beat unit for the time signature
+
+// User-settable note and break durations (as note types, e.g., 4 for quarter note)
+int noteDurationType = 4; // Quarter note
+int breakDurationType = 4; // Quarter note
+
+float noteDuration; // Duration of a note in milliseconds
+float breakDuration; // Duration of a break in milliseconds
+
+enum State { PLAYING, BREAK };
+State currentState = PLAYING;
+
+BaseWaveform* currentWaveform = nullptr;
+int currentFrequency = 220;
+
 void setup() {
-  Serial.begin(9600); // Start serial communication at 9600 baud
+  Serial.begin(9600);
   initSDCard();
+  startMozzi(64);
+  // Calculate durations based on user-set values
+  noteDuration = noteDurationToTime(noteDurationType, bpm, beatUnit, defaultBeatUnit);
+  //breakDuration = 0.0;
+  breakDuration = noteDurationToTime(breakDurationType, bpm, beatUnit, defaultBeatUnit);
+
+  currentWaveform = new SawWave(currentFrequency);
+  lastChangeTime = millis();
 }
 
-void loop() {
-  if (useSDCardData && !logDataToSDCard) {
-    bioValue = readDataFromSD();
-    if (dataValue == -1) {
-      Serial.println("End of data or error reading from SD card");
-      // Handle end of data or error
-    }
-  } 
-  else {
-  bioValue = analogRead(bioSensorPin);// Read the value from the bioelectric sensor
-  }
-  dataValue = applyFilter(bioValue, filterIndex); // Apply the selected filter
-
-  float voltage = (dataValue / 1023.0) * 3.3; // Convert to voltage
-  float milliVolts = voltage * 1000; // Convert voltage to millivolts
-
-  // Format the data for output
-  Serial.print(">bio_voltage:");
-  Serial.println(milliVolts);
-
-   if (isSDCardAvailable() && logDataToSDCard && !useSDCardData) {
-    logData(String(bioValue));
-    Serial.print("Wrote to log: ");
-    Serial.println(bioValue);
-  }
-
-  delay(10); // Wait for 10 ms
+void loop(){
+  audioHook();
 }
+
+void updateControl(){
+  unsigned long currentTime = millis();
+  switch (currentState) {
+    case PLAYING:
+      if (currentTime - lastChangeTime >= noteDuration) {
+        currentWaveform->setFrequency(0); // Silence the output for a break
+        currentState = BREAK;
+        lastChangeTime = currentTime;
+      }
+      break;
+    case BREAK:
+      if (currentTime - lastChangeTime >= breakDuration) {
+        bioValue = analogRead(bioSensorPin);
+        dataValue = applyFilter(bioValue, filterIndex);
+        float freq = harmonicMapping(dataValue, 0, 1023, 110);
+        currentWaveform->setFrequency(freq);
+        currentState = PLAYING;
+        lastChangeTime = currentTime;
+      }
+      break;
+  }
+}
+
+int updateAudio(){
+  return currentWaveform->update();
+}
+
