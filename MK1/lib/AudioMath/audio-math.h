@@ -23,7 +23,7 @@ enum MappingType {
 // Function Declarations
 float midiNoteToFrequency(int midiNumber);
 int frequencyToMIDINote(float frequency);
-float mapToScale(int input, int inputMin, int inputMax, const int intervals[], int numIntervals);
+float mapToScale(int input, int inputMin, int inputMax, int keyRootMidiNote, const int intervals[], int numIntervals);
 float mapToFullSpectrum(int input, int inputMin, int inputMax);
 float dynamicRangeCompressionMapping(int input, int inputMin, int inputMax, const int intervals[], int numIntervals);
 float harmonicMapping(int input, int inputMin, int inputMax, float baseFrequency);
