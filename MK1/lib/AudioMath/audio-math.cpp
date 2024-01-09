@@ -56,12 +56,12 @@ float mapToFullSpectrum(int input, int inputMin, int inputMax) {
 }
 
 // Function for dynamic range compression mapping
-float dynamicRangeCompressionMapping(int input, int inputMin, int inputMax, const int intervals[], int numIntervals) {
+float dynamicRangeCompressionMapping(int input, int inputMin, int inputMax, int keyRootMidiNote, const int intervals[], int numIntervals) {
     // Apply compression to the input
     float compressedInput = log10(input - inputMin + 1) / log10(inputMax - inputMin + 1) * (inputMax - inputMin);
 
     // Now map this compressed input to a scale
-    return mapToScale(compressedInput, inputMin, inputMax, intervals, numIntervals);
+    return mapToScale(compressedInput, inputMin, inputMax, keyRootMidiNote, intervals, numIntervals);
 }
 
 // Function for harmonic mapping
