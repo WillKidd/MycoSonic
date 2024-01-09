@@ -7,6 +7,7 @@
 #include <tables/triangle2048_int8.h>
 #include <tables/saw2048_int8.h>
 #include <tables/square_no_alias_2048_int8.h>
+#include <Wire.h>
 
 class BaseWaveform {
 public:
@@ -150,20 +151,6 @@ private:
     bool effectEnabled;
 };
 
-class WahWahEffect {
-public:
-    WahWahEffect(float lfoRate, float depth, float centerFrequency, float qFactor);
-    int applyEffect(int inputSample);
-    void enableEffect(bool enable);
-
-private:
-    float lfoRate;          // Rate of the LFO that controls the filter sweep
-    float depth;            // Depth of the filter sweep
-    float centerFrequency;  // Center frequency around which the filter sweeps
-    float qFactor;          // Quality factor of the filter
-    float lfoPhase;
-    bool effectEnabled;
-};
 
 class PanEffect {
 public:

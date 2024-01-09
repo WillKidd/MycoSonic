@@ -274,34 +274,6 @@ void DistortionEffect::enableEffect(bool enable) {
     effectEnabled = enable;
 }
 
-WahWahEffect::WahWahEffect(float lfoRate, float depth, float centerFrequency, float qFactor)
-    : lfoRate(lfoRate), depth(depth), centerFrequency(centerFrequency), qFactor(qFactor), lfoPhase(0), effectEnabled(true) {}
-
-int WahWahEffect::applyEffect(int inputSample) {
-    if (!effectEnabled) {
-        return inputSample;
-    }
-
-    // Update the LFO phase
-    lfoPhase += lfoRate / AUDIO_RATE;
-    if (lfoPhase > 1) lfoPhase -= 1;
-
-    // Calculate the current frequency of the filter
-    float frequencySweep = depth * sin(lfoPhase * 2 * PI);
-    float currentFrequency = centerFrequency + frequencySweep;
-
-    // Apply the filter (simplified for now, real implementation might require a more complex filter design)
-    // For a real filter, implement a band-pass filter here
-    // Currently will just modulate the sample value for demonstration purpose
-    float modulatedSample = inputSample * (1 + frequencySweep);
-
-    return static_cast<int>(modulatedSample);
-}
-
-void WahWahEffect::enableEffect(bool enable) {
-    effectEnabled = enable;
-}
-
 PanEffect::PanEffect(float lfoRate)
     : lfoRate(lfoRate), lfoPhase(0), effectEnabled(true) {}
 
