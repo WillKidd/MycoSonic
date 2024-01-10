@@ -5,6 +5,10 @@
 #include <SPI.h>
 #include <SD.h>
 
+
+const int chipSelect = 3; // SD card pin
+const String filename = "log.txt";
+
 void initSDCard();
 bool isSDCardAvailable();
 void logData(String data);
