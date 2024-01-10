@@ -2,7 +2,7 @@
 #define MENU_SYSTEM.h
 
 #include <Arduino.h>
-#include "LCD_HANDLER.h" // Include the LCDHandler header
+#include "LCD_HANDLER.h"
 
 const int MAX_MENU_ITEMS = 10; // Maximum number of child menu items
 
@@ -78,8 +78,8 @@ public:
 
 
 private:
-    MenuItem* currentItem;
     MenuItem* rootItem;
+    MenuItem* currentItem;
     int currentIndex;
     bool editMode;
     float originalValue;

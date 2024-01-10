@@ -189,6 +189,8 @@ void MenuHandler::displayCurrentItem() const {
             lcdHandler->displayText("Value: " + editableItem->getFormattedValue(), 0, 1);
             break;
         }
-        // ... handle other item types as needed ...
+        case BASE_ITEM:
+        break;
+         // ... handle other item types as needed ...
     }
 }
