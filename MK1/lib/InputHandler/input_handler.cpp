@@ -7,10 +7,10 @@ InputHandler::InputHandler(int okPin, int editPin, int backPin, int togglePin, i
       backPressed(false), togglePressed(false), 
       rotaryIncremented(false), rotaryDecremented(false) {
 
-    pinMode(okButtonPin, INPUT_PULLUP);
-    pinMode(editButtonPin, INPUT_PULLUP);
-    pinMode(backButtonPin, INPUT_PULLUP);
-    pinMode(toggleButtonPin, INPUT_PULLUP);
+    pinMode(okButtonPin, INPUT);
+    pinMode(editButtonPin, INPUT);
+    pinMode(backButtonPin, INPUT);
+    pinMode(toggleButtonPin, INPUT);
     pinMode(rotaryPinA, INPUT);
     pinMode(rotaryPinB, INPUT);
 }
@@ -21,10 +21,10 @@ void InputHandler::update() {
 }
 
 void InputHandler::readButtons() {
-    okPressed = digitalRead(okButtonPin) == LOW;
-    editPressed = digitalRead(editButtonPin) == LOW;
-    backPressed = digitalRead(backButtonPin) == LOW;
-    togglePressed = digitalRead(toggleButtonPin) == LOW;
+    okPressed = digitalRead(okButtonPin) == HIGH;
+    editPressed = digitalRead(editButtonPin) == HIGH;
+    backPressed = digitalRead(backButtonPin) == HIGH;
+    togglePressed = digitalRead(toggleButtonPin) == HIGH;
 }
 
 void InputHandler::readRotaryEncoder() {
