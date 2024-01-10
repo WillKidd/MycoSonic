@@ -9,10 +9,17 @@ void LCDHandler::init() {
 }
 
 void LCDHandler::clearDisplay() {
-    lcd.clear();
+    unsigned long currentMillis = millis();
+    if (currentMillis - lastDisplayUpdate >= displayUpdateInterval) {
+        lcd.clear();
+    }
 }
 
 void LCDHandler::displayText(const String& text, uint8_t col, uint8_t row) {
-    lcd.setCursor(col, row);
-    lcd.print(text);
+    unsigned long currentMillis = millis();
+    if (currentMillis - lastDisplayUpdate >= displayUpdateInterval) {
+        lcd.setCursor(col, row);
+        lcd.print(text);
+        lastDisplayUpdate = currentMillis; // Update the last display time
+    }
 }
