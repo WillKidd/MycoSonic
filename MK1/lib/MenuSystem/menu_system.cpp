@@ -68,21 +68,39 @@ String EditableMenuItem::getFormattedValue() const {
 MenuHandler::MenuHandler(MenuItem* root) : rootItem(root), currentItem(root), currentIndex(0) {}
 
 void MenuHandler::nextItem() {
-    if (currentItem->getChildCount() > 0) {
-        currentIndex = (currentIndex + 1) % currentItem->getChildCount();
+    MenuItem* parent = currentItem->getParent();
+    if (parent != nullptr) {
+        int siblingCount = parent->getChildCount();
+        for (int i = 0; i < siblingCount; ++i) {
+            if (parent->getChildren()[i] == currentItem) {
+                currentIndex = (i + 1) % siblingCount;
+                currentItem = parent->getChildren()[currentIndex];
+                return;
+            }
+        }
     }
 }
 
+
 void MenuHandler::previousItem() {
-    if (currentItem->getChildCount() > 0) {
-        currentIndex = (currentIndex == 0) ? currentItem->getChildCount() - 1 : currentIndex - 1;
+    MenuItem* parent = currentItem->getParent();
+    if (parent != nullptr) {
+        int siblingCount = parent->getChildCount();
+        for (int i = 0; i < siblingCount; ++i) {
+            if (parent->getChildren()[i] == currentItem) {
+                currentIndex = (i - 1 + siblingCount) % siblingCount;
+                currentItem = parent->getChildren()[currentIndex];
+                return;
+            }
+        }
     }
 }
+
 
 void MenuHandler::selectItem() {
     if (currentItem->getChildCount() > 0) {
-        currentItem = currentItem->getChildren()[currentIndex];
         currentIndex = 0;
+        currentItem = currentItem->getChildren()[currentIndex];
     }
 }
 
@@ -146,7 +164,13 @@ bool MenuHandler::isEditMode(){
 void MenuHandler::updateParameterValue(float delta) {
     if (editMode && currentItem->getType() == EDITABLE_ITEM) {
         auto editableItem = static_cast<EditableMenuItem*>(currentItem);
-        editableItem->setParameterValue(editableItem->getParameterValue() + delta);
+        if ((editableItem->getParameterValue() + delta) >= 0.0){
+            editableItem->setParameterValue(editableItem->getParameterValue() + delta);
+        }
+        else {
+            editableItem->setParameterValue(editableItem->getParameterValue() + delta);
+        }
+        
     }
 }
 
@@ -169,14 +193,14 @@ void MenuHandler::setLCDHandler(LCDHandler* lcd) {
 
 void MenuHandler::displayCurrentItem() const {
     if (!lcdHandler) return; // Check if LCDHandler is set
-
+    Serial.println(currentItem->getName());
     lcdHandler->clearDisplay(); // Clear the display before showing new information
 
     // First line: Display the name of the current menu item
     lcdHandler->displayText(currentItem->getName(), 0, 0);
 
     // Second line: Additional information based on the item type
-    switch(currentItem->getType()) {
+/*     switch(currentItem->getType()) {
         case SINGLE_TOGGLE_ITEM:
         case MULTI_TOGGLE_ITEM: {
             auto toggleItem = static_cast<ToggleMenuItem*>(currentItem);
@@ -192,5 +216,5 @@ void MenuHandler::displayCurrentItem() const {
         case BASE_ITEM:
         break;
          // ... handle other item types as needed ...
-    }
+    } */
 }

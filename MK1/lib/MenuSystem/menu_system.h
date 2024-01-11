@@ -4,7 +4,7 @@
 #include <Arduino.h>
 #include "LCD_HANDLER.h"
 
-const int MAX_MENU_ITEMS = 10; // Maximum number of child menu items
+const int MAX_MENU_ITEMS = 6; // Maximum number of child menu items
 
 enum MenuItemType { BASE_ITEM, SINGLE_TOGGLE_ITEM, MULTI_TOGGLE_ITEM, EDITABLE_ITEM };
 
@@ -51,6 +51,7 @@ public:
 
 private:
     float& parameter;
+    MenuItem* childItems[0];
 };
 
 class MenuHandler {
