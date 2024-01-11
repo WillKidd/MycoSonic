@@ -1,6 +1,7 @@
 #include <Arduino.h>
 #include "signal_processing.h"
-#include "data_handler.h"
+//#include "data_handler.h"
+#include <SPI.h>
 #include "mozzi-audio.h"
 #include "audio-math.h"
 #include "input_handler.h"
@@ -41,17 +42,20 @@ const int ROTARY_PIN_A = 7;
 const int ROTARY_PIN_B = 8;
 
 InputHandler inputHandler(OK_BUTTON_PIN, EDIT_BUTTON_PIN, BACK_BUTTON_PIN, TOGGLE_BUTTON_PIN, ROTARY_PIN_A, ROTARY_PIN_B);
-MenuItem rootItem("Main Menu", BASE_ITEM);
+MenuItem rootItem("A", BASE_ITEM);
+float test = 1.0f;
+MenuItem inputItem("AA", BASE_ITEM);
+EditableMenuItem inputFilterItem("AB", test);
+EditableMenuItem timingItem("AC", test);
+EditableMenuItem signalMapping("AD", test); 
+/* MenuItem outputFilterItem("AE", BASE_ITEM);
+MenuItem outputItem("AF", BASE_ITEM); */
 MenuHandler menuHandler(&rootItem);
 
 
-void updateDisplay(){
-    menuHandler.displayCurrentItem();
-}
-
 void setup() {
   Serial.begin(9600);
-  initSDCard();
+  //initSDCard();
   startMozzi(64);
 
   noteDuration = noteDurationToTime(noteDurationType, bpm, beatUnit, defaultBeatUnit);
@@ -61,8 +65,16 @@ void setup() {
   lastChangeTime = millis();
   LCDHandler lcdHandler(0x27, 16, 2);
   lcdHandler.init();
+  
+  rootItem.addChild(&inputItem);
+  rootItem.addChild(&inputFilterItem);
+  rootItem.addChild(&timingItem);
+  rootItem.addChild(&signalMapping); 
+/*   rootItem.addChild(&outputFilterItem);
+  rootItem.addChild(&outputItem); */
   menuHandler.setLCDHandler(&lcdHandler);
-  updateDisplay();
+  menuHandler.displayCurrentItem();
+  //Serial.println(inputItem.getName());
 }
 
 void loop(){
@@ -75,59 +87,61 @@ void updateControl(){
   
   inputHandler.update();
   if (inputHandler.isOkPressed()) {
-    Serial.println("OK");
+    //Serial.println("OK");
     if (menuHandler.isEditMode()) {
         menuHandler.saveChanges(); // Save changes if in edit mode
         menuHandler.exitEditMode(); // Exit edit mode
     }
+    //Serial.println(menuHandler.getCurrentItem()->getName());
+    menuHandler.displayCurrentItem();
   }
-
   else if (inputHandler.isEditPressed()) {
-      Serial.println("EDIT");
-
-    if (menuHandler.isEditMode()) {
-        menuHandler.exitEditMode(); // Exit edit mode
-    } else {
-        menuHandler.enterEditMode(); // Enter edit mode
-    }
+      //Serial.println("EDIT");
+      menuHandler.enterEditMode(); // Enter edit mode
+      menuHandler.selectItem();
+      //Serial.println(menuHandler.getCurrentItem()->getName());
+      menuHandler.displayCurrentItem();
   }
-
   else if (inputHandler.isBackPressed()) {
-      Serial.println("BACK");
+      //Serial.println("BACK");
     if (menuHandler.isEditMode()) {
         menuHandler.discardChanges(); // Discard changes if in edit mode
         menuHandler.exitEditMode(); // Exit edit mode
+        menuHandler.back();
     } else {
         menuHandler.back(); // Navigate back in the menu
     }
+    //Serial.println(menuHandler.getCurrentItem()->getName());
+    menuHandler.displayCurrentItem();
   }
   else if (inputHandler.isToggleButtonPressed()) {
-    Serial.println("TOGGLE");
-    menuHandler.toggleCurrentItem(); // Toggle the current item
+    //Serial.println("TOGGLE");
+    if (!menuHandler.isEditMode()){
+      menuHandler.toggleCurrentItem(); // Toggle the current item
+    }
+    //Serial.println(menuHandler.getCurrentItem()->getName());
+    menuHandler.displayCurrentItem();
   }
-/*   else if (inputHandler.isRotaryIncremented()) {
-      Serial.println("UP");
+ else if (inputHandler.isUpButtonPressed()) {
     if (menuHandler.isEditMode()) {
-        menuHandler.updateParameterValue(0.1); // Increase editable parameter
-    } else {
-        menuHandler.nextItem(); // Navigate to the next item
+      menuHandler.updateParameterValue(0.1);
+    } 
+    else {
+      menuHandler.previousItem();
     }
-  } */
-
-/*     // Handle Rotary Encoder Decrements
-  else if (inputHandler.isRotaryDecremented()) {
-    Serial.println("DOWN");
+    //Serial.println(menuHandler.getCurrentItem()->getName());
+    menuHandler.displayCurrentItem();
+  }
+  else if (inputHandler.isDownButtonPressed()) {
     if (menuHandler.isEditMode()) {
-        menuHandler.updateParameterValue(-0.1); // Decrease editable parameter
-    } else {
-        menuHandler.previousItem(); // Navigate to the previous item
+      menuHandler.updateParameterValue(-0.1);
+    } 
+    else {
+      menuHandler.nextItem();
     }
-
-  }*/
-
-/*   if (changed){
-    updateDisplay();
-  }  */
+    //Serial.println(menuHandler.getCurrentItem()->getName());
+    menuHandler.displayCurrentItem();
+  }
   
   switch (currentState) {
     case PLAYING:
