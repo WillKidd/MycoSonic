@@ -5,12 +5,12 @@ InputHandler::InputHandler(int okPin, int editPin, int backPin, int togglePin, i
       upButtonPin(upPin), downButtonPin(downPin) {
 
     // Initialize pins with internal pull-up resistors
-    pinMode(okButtonPin, INPUT_PULLUP);
-    pinMode(editButtonPin, INPUT_PULLUP);
-    pinMode(backButtonPin, INPUT_PULLUP);
-    pinMode(toggleButtonPin, INPUT_PULLUP);
-    pinMode(upButtonPin, INPUT_PULLUP);
-    pinMode(downButtonPin, INPUT_PULLUP);
+    pinMode(okButtonPin, INPUT);
+    pinMode(editButtonPin, INPUT);
+    pinMode(backButtonPin, INPUT);
+    pinMode(toggleButtonPin, INPUT);
+    pinMode(upButtonPin, INPUT);
+    pinMode(downButtonPin, INPUT);
 
     // Attach pins to debouncers and set debounce interval
     okDebouncer.attach(okButtonPin);
