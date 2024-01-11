@@ -8,8 +8,18 @@
 #include "menu_system.h"
 
 const int bioSensorPin = A0;
-int filterIndex = 0;
+
+bool useSensorData = true;
 bool useSDCardData = false;
+
+bool useMovingAverage = true;
+bool useLowPass = false;
+bool useHighPass = false;
+bool useNotch = false;
+bool useMedian = false;
+bool useKalman = false;
+int filterIndex = 0;
+
 bool logDataToSDCard = false;
 
 float dataValue;
@@ -42,14 +52,21 @@ const int ROTARY_PIN_A = 7;
 const int ROTARY_PIN_B = 8;
 
 InputHandler inputHandler(OK_BUTTON_PIN, EDIT_BUTTON_PIN, BACK_BUTTON_PIN, TOGGLE_BUTTON_PIN, ROTARY_PIN_A, ROTARY_PIN_B);
-MenuItem rootItem("A", BASE_ITEM);
-float test = 1.0f;
-MenuItem inputItem("AA", BASE_ITEM);
-EditableMenuItem inputFilterItem("AB", test);
-EditableMenuItem timingItem("AC", test);
-EditableMenuItem signalMapping("AD", test); 
-/* MenuItem outputFilterItem("AE", BASE_ITEM);
-MenuItem outputItem("AF", BASE_ITEM); */
+MenuItem rootItem("MycoSonic MK1", BASE_ITEM);
+MenuItem inputItem("Input", BASE_ITEM);
+ToggleMenuItem sensorItem("Sensor", useSensorData, SINGLE_TOGGLE_ITEM);
+ToggleMenuItem sdItem("SD", useSDCardData, SINGLE_TOGGLE_ITEM);
+MenuItem inputFilterItem("InputFilter", BASE_ITEM);
+ToggleMenuItem movingAverageItem("MA", useSensorData, SINGLE_TOGGLE_ITEM);
+ToggleMenuItem lowPassItem("LPF", useSDCardData, SINGLE_TOGGLE_ITEM);
+ToggleMenuItem highPassItem("HPF", useSensorData, SINGLE_TOGGLE_ITEM);
+ToggleMenuItem notchItem("NF", useSDCardData, SINGLE_TOGGLE_ITEM);
+ToggleMenuItem medianItem("Mdn", useSensorData, SINGLE_TOGGLE_ITEM);
+ToggleMenuItem kalmanItem("Kalman", useSDCardData, SINGLE_TOGGLE_ITEM);
+MenuItem timingItem("Timing", BASE_ITEM);
+MenuItem signalMapping("NoteMapping", BASE_ITEM); 
+MenuItem outputFilterItem("OutputFilter", BASE_ITEM);
+MenuItem outputItem("Output", BASE_ITEM);
 MenuHandler menuHandler(&rootItem);
 
 
@@ -67,12 +84,21 @@ void setup() {
   lcdHandler.init();
   
   rootItem.addChild(&inputItem);
+  inputItem.addChild(&sensorItem);
+  inputItem.addChild(&sdItem);
   rootItem.addChild(&inputFilterItem);
+  inputFilterItem.addChild(&movingAverageItem);
+  inputFilterItem.addChild(&lowPassItem);
+  inputFilterItem.addChild(&highPassItem);
+  inputFilterItem.addChild(&notchItem);
+  inputFilterItem.addChild(&medianItem);
+  inputFilterItem.addChild(&kalmanItem);
   rootItem.addChild(&timingItem);
   rootItem.addChild(&signalMapping); 
-/*   rootItem.addChild(&outputFilterItem);
-  rootItem.addChild(&outputItem); */
+  rootItem.addChild(&outputFilterItem);
+  rootItem.addChild(&outputItem);
   menuHandler.setLCDHandler(&lcdHandler);
+  menuHandler.selectItem();
   menuHandler.displayCurrentItem();
   //Serial.println(inputItem.getName());
 }
