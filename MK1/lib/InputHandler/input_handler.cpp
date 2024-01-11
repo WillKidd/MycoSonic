@@ -2,17 +2,29 @@
 
 InputHandler::InputHandler(int okPin, int editPin, int backPin, int togglePin, int upPin, int downPin)
     : okButtonPin(okPin), editButtonPin(editPin), backButtonPin(backPin), toggleButtonPin(togglePin),
-      upButtonPin(upPin), downButtonPin(downPin), 
-      okPressed(false), editPressed(false),
-      backPressed(false), togglePressed(false), 
-      upPressed(false), downPressed(false) {
+      upButtonPin(upPin), downButtonPin(downPin) {
 
-    pinMode(okButtonPin, INPUT);
-    pinMode(editButtonPin, INPUT);
-    pinMode(backButtonPin, INPUT);
-    pinMode(toggleButtonPin, INPUT);
-    pinMode(upPin, INPUT);
-    pinMode(downPin, INPUT);
+    // Initialize pins with internal pull-up resistors
+    pinMode(okButtonPin, INPUT_PULLUP);
+    pinMode(editButtonPin, INPUT_PULLUP);
+    pinMode(backButtonPin, INPUT_PULLUP);
+    pinMode(toggleButtonPin, INPUT_PULLUP);
+    pinMode(upButtonPin, INPUT_PULLUP);
+    pinMode(downButtonPin, INPUT_PULLUP);
+
+    // Attach pins to debouncers and set debounce interval
+    okDebouncer.attach(okButtonPin);
+    okDebouncer.interval(25);
+    editDebouncer.attach(editButtonPin);
+    editDebouncer.interval(25);
+    backDebouncer.attach(backButtonPin);
+    backDebouncer.interval(25);
+    toggleDebouncer.attach(toggleButtonPin);
+    toggleDebouncer.interval(25);
+    upDebouncer.attach(upButtonPin);
+    upDebouncer.interval(25);
+    downDebouncer.attach(downButtonPin);
+    downDebouncer.interval(25);
 }
 
 void InputHandler::update() {
@@ -20,34 +32,34 @@ void InputHandler::update() {
 }
 
 void InputHandler::readButtons() {
-    okPressed = digitalRead(okButtonPin) == HIGH;
-    editPressed = digitalRead(editButtonPin) == HIGH;
-    backPressed = digitalRead(backButtonPin) == HIGH;
-    togglePressed = digitalRead(toggleButtonPin) == HIGH;
-    upPressed = digitalRead(upButtonPin) == HIGH;
-    downPressed = digitalRead(downButtonPin) == HIGH;
+    okDebouncer.update();
+    editDebouncer.update();
+    backDebouncer.update();
+    toggleDebouncer.update();
+    upDebouncer.update();
+    downDebouncer.update();
 }
 
 bool InputHandler::isOkPressed() const {
-    return okPressed;
+    return okDebouncer.fell();
 }
 
 bool InputHandler::isEditPressed() const {
-    return editPressed;
+    return editDebouncer.fell();
 }
 
 bool InputHandler::isBackPressed() const {
-    return backPressed;
+    return backDebouncer.fell();
 }
 
 bool InputHandler::isToggleButtonPressed() const {
-    return togglePressed;
+    return toggleDebouncer.fell();
 }
 
 bool InputHandler::isUpButtonPressed() const {
-    return upPressed;
+    return upDebouncer.fell();
 }
 
 bool InputHandler::isDownButtonPressed() const {
-    return downPressed;
+    return downDebouncer.fell();
 }
