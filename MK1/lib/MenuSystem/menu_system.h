@@ -35,6 +35,7 @@ public:
 
     void toggle();
     bool isEnabled() const;
+    MenuItem* childItems[0];
 
 private:
     bool& enabled;

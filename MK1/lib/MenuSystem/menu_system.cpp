@@ -200,7 +200,7 @@ void MenuHandler::displayCurrentItem() const {
     lcdHandler->displayText(currentItem->getName(), 0, 0);
 
     // Second line: Additional information based on the item type
-/*     switch(currentItem->getType()) {
+     switch(currentItem->getType()) {
         case SINGLE_TOGGLE_ITEM:
         case MULTI_TOGGLE_ITEM: {
             auto toggleItem = static_cast<ToggleMenuItem*>(currentItem);
@@ -216,5 +216,5 @@ void MenuHandler::displayCurrentItem() const {
         case BASE_ITEM:
         break;
          // ... handle other item types as needed ...
-    } */
+    } 
 }
