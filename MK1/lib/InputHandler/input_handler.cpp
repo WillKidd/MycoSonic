@@ -1,23 +1,22 @@
 #include "INPUT_HANDLER.h"
 
-InputHandler::InputHandler(int okPin, int editPin, int backPin, int togglePin, int rotaryA, int rotaryB)
+InputHandler::InputHandler(int okPin, int editPin, int backPin, int togglePin, int upPin, int downPin)
     : okButtonPin(okPin), editButtonPin(editPin), backButtonPin(backPin), toggleButtonPin(togglePin),
-      rotaryPinA(rotaryA), rotaryPinB(rotaryB), 
-      lastRotaryState(LOW), okPressed(false), editPressed(false),
+      upButtonPin(upPin), downButtonPin(downPin), 
+      okPressed(false), editPressed(false),
       backPressed(false), togglePressed(false), 
-      rotaryIncremented(false), rotaryDecremented(false) {
+      upPressed(false), downPressed(false) {
 
     pinMode(okButtonPin, INPUT);
     pinMode(editButtonPin, INPUT);
     pinMode(backButtonPin, INPUT);
     pinMode(toggleButtonPin, INPUT);
-    pinMode(rotaryPinA, INPUT);
-    pinMode(rotaryPinB, INPUT);
+    pinMode(upPin, INPUT);
+    pinMode(downPin, INPUT);
 }
 
 void InputHandler::update() {
     readButtons();
-    readRotaryEncoder();
 }
 
 void InputHandler::readButtons() {
@@ -25,21 +24,8 @@ void InputHandler::readButtons() {
     editPressed = digitalRead(editButtonPin) == HIGH;
     backPressed = digitalRead(backButtonPin) == HIGH;
     togglePressed = digitalRead(toggleButtonPin) == HIGH;
-}
-
-void InputHandler::readRotaryEncoder() {
-    int newState = digitalRead(rotaryPinA);
-    if (newState != lastRotaryState) {
-        lastRotaryState = newState;
-        if (digitalRead(rotaryPinB) != newState) {
-            rotaryIncremented = true;
-        } else {
-            rotaryDecremented = true;
-        }
-    } else {
-        rotaryIncremented = false;
-        rotaryDecremented = false;
-    }
+    upPressed = digitalRead(upButtonPin) == HIGH;
+    downPressed = digitalRead(downButtonPin) == HIGH;
 }
 
 bool InputHandler::isOkPressed() const {
@@ -58,10 +44,10 @@ bool InputHandler::isToggleButtonPressed() const {
     return togglePressed;
 }
 
-bool InputHandler::isRotaryIncremented() const {
-    return rotaryIncremented;
+bool InputHandler::isUpButtonPressed() const {
+    return upPressed;
 }
 
-bool InputHandler::isRotaryDecremented() const {
-    return rotaryDecremented;
+bool InputHandler::isDownButtonPressed() const {
+    return downPressed;
 }

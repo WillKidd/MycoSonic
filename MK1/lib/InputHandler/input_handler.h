@@ -5,25 +5,23 @@
 
 class InputHandler {
 public:
-    InputHandler(int okPin, int editPin, int backPin, int togglePin, int rotaryPinA, int rotaryPinB);
+    InputHandler(int okPin, int editPin, int backPin, int togglePin, int upPin, int downPin);
 
     void update();
     bool isOkPressed() const;
     bool isEditPressed() const;
     bool isBackPressed() const;
     bool isToggleButtonPressed() const;
-    bool isRotaryIncremented() const;
-    bool isRotaryDecremented() const;
+    bool isUpButtonPressed() const;
+    bool isDownButtonPressed() const;
 
 private:
     int okButtonPin, editButtonPin, backButtonPin, toggleButtonPin;
-    int rotaryPinA, rotaryPinB;
-    int lastRotaryState;
+    int upButtonPin, downButtonPin;
     bool okPressed, editPressed, backPressed, togglePressed;
-    bool rotaryIncremented, rotaryDecremented;
+    bool upPressed, downPressed;
 
     void readButtons();
-    void readRotaryEncoder();
 };
 
 #endif
