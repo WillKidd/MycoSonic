@@ -1,12 +1,5 @@
 #include "audio-math.h"
 
-#define A4_FREQ 440.0
-#define SEMITONE_RATIO 1.059463094359 // 2^(1/12)
-#define MIDI_NOTE_A4 69
-#define MIN_MIDI_NOTE 21  // A0, lowest note on standard piano
-#define MAX_MIDI_NOTE 108 // C8, highest note on standard piano
-#define MAX_SCALE_NOTES 100 // Estimate for max number of notes needed
-
 float midiNoteToFrequency(int midiNumber) {
     // Bounds checking
     if (midiNumber < MIN_MIDI_NOTE) midiNumber = MIN_MIDI_NOTE;
