@@ -1,6 +1,6 @@
 #include "audio-math.h"
 
-float midiNoteToFrequency(int midiNumber) {
+float midiNoteToFrequency(uint8_t midiNumber) {
     // Bounds checking
     if (midiNumber < MIN_MIDI_NOTE) midiNumber = MIN_MIDI_NOTE;
     if (midiNumber > MAX_MIDI_NOTE) midiNumber = MAX_MIDI_NOTE;
@@ -10,12 +10,12 @@ float midiNoteToFrequency(int midiNumber) {
 }
 
 // Function to calculate MIDI note number from frequency
-int frequencyToMIDINote(float frequency) {
+uint8_t frequencyToMIDINote(float frequency) {
     // Handle non-positive frequencies by returning the lowest possible MIDI note
     if (frequency <= 0) return MIN_MIDI_NOTE;
 
     // Calculate the MIDI note number using log (natural logarithm)
-    int midiNote = round(MIDI_NOTE_A4 + (12 * log(frequency / A4_FREQ) / log(2)));
+    uint8_t midiNote = round(MIDI_NOTE_A4 + (12 * log(frequency / A4_FREQ) / log(2)));
 
     // Clamp the MIDI note to the valid range
     if (midiNote < MIN_MIDI_NOTE) midiNote = MIN_MIDI_NOTE;
@@ -25,14 +25,14 @@ int frequencyToMIDINote(float frequency) {
 }
 
 // Function to map input to a scale in a certain key
-float mapToScale(int input, int inputMin, int inputMax, int keyRootMidiNote, const int intervals[], int numIntervals) {
-    int totalRange = MAX_MIDI_NOTE - MIN_MIDI_NOTE + 1;
-    int totalNotesInScale = (totalRange / numIntervals) * numIntervals;
+float mapToScale(uint16_t input, uint16_t inputMin, uint16_t inputMax, uint8_t keyRootMidiNote, const uint8_t intervals[], uint8_t numIntervals) {
+    uint8_t totalRange = MAX_MIDI_NOTE - MIN_MIDI_NOTE + 1;
+    uint16_t totalNotesInScale = (totalRange / numIntervals) * numIntervals;
 
-    int scaledInput = map(input, inputMin, inputMax, 0, totalNotesInScale - 1);
+    uint16_t scaledInput = map(input, inputMin, inputMax, 0, totalNotesInScale - 1);
 
-    int midiNote = keyRootMidiNote;
-    for (int i = 0; i <= scaledInput; ++i) {
+    uint8_t midiNote = keyRootMidiNote;
+    for (uint16_t i = 0; i <= scaledInput; ++i) {
         midiNote += intervals[i % numIntervals];
         if (midiNote > MAX_MIDI_NOTE) {
             midiNote = MIN_MIDI_NOTE + (midiNote - MAX_MIDI_NOTE - 1) % totalRange;
@@ -41,15 +41,18 @@ float mapToScale(int input, int inputMin, int inputMax, int keyRootMidiNote, con
     
     return midiNoteToFrequency(midiNote);
 }
-
+/*
+uint16_t
+uint8_t
+*/
 // Function for full spectrum mapping
-float mapToFullSpectrum(int input, int inputMin, int inputMax) {
-    int midiNumber = map(input, inputMin, inputMax, MIN_MIDI_NOTE, MAX_MIDI_NOTE);
+float mapToFullSpectrum(uint16_t input, uint16_t inputMin, uint16_t inputMax) {
+    uint8_t midiNumber = map(input, inputMin, inputMax, MIN_MIDI_NOTE, MAX_MIDI_NOTE);
     return midiNoteToFrequency(midiNumber);
 }
 
 // Function for dynamic range compression mapping
-float dynamicRangeCompressionMapping(int input, int inputMin, int inputMax, int keyRootMidiNote, const int intervals[], int numIntervals) {
+float dynamicRangeCompressionMapping(uint16_t input, uint16_t inputMin, uint16_t inputMax, uint8_t keyRootMidiNote, const uint8_t intervals[], uint8_t numIntervals) {
     // Apply compression to the input
     float compressedInput = log10(input - inputMin + 1) / log10(inputMax - inputMin + 1) * (inputMax - inputMin);
 
@@ -58,9 +61,9 @@ float dynamicRangeCompressionMapping(int input, int inputMin, int inputMax, int 
 }
 
 // Function for harmonic mapping
-float harmonicMapping(int input, int inputMin, int inputMax, float baseFrequency) {
+float harmonicMapping(uint16_t input, uint16_t inputMin, uint16_t inputMax, float baseFrequency) {
     // Normalize input to a harmonic index (1st, 2nd, 3rd harmonic, etc.)
-    int harmonicIndex = map(input, inputMin, inputMax, 1, 10); // Example range: 1st to 10th harmonic
+    uint8_t harmonicIndex = map(input, inputMin, inputMax, 1, 10); // Example range: 1st to 10th harmonic
 
     // Calculate the frequency of the specified harmonic
     return baseFrequency * harmonicIndex;
@@ -86,7 +89,7 @@ int alteredIntervals[] = {1, 2, 1, 2, 2, 2, 2};
 int bebopDominantIntervals[] = {2, 2, 1, 2, 2, 1, 1, 1};
 */
 
-float millisecondsPerBeat(int bpm) {
+float millisecondsPerBeat(uint8_t bpm) {
   return 60000 / float(bpm);
 }
 
@@ -96,7 +99,7 @@ float millisecondsPerBeat(int bpm) {
 // beatUnit: The note value that represents one beat (bottom number in time signature)
 // defaultBeatUnit: The default note value for one beat (usually a quarter note, represented as 4)
 
-float noteDurationToTime(int noteType, int bpm, int beatUnit, int defaultBeatUnit = 4) {
+float noteDurationToTime(uint8_t noteType, uint8_t bpm, uint8_t beatUnit, uint8_t defaultBeatUnit = 4) {
     float beatDuration = millisecondsPerBeat(bpm);
 
     // Adjust the duration based on the beat unit
@@ -108,7 +111,7 @@ float noteDurationToTime(int noteType, int bpm, int beatUnit, int defaultBeatUni
     return beatDuration * (4.0 / noteType);
 }
 
-float noteDurationToTimeFractional(float noteTypeRatio, int bpm, int beatUnit, int defaultBeatUnit = 4) {
+float noteDurationToTimeFractional(float noteTypeRatio, uint8_t bpm, uint8_t beatUnit, uint8_t defaultBeatUnit = 4) {
     float beatDuration = millisecondsPerBeat(bpm);
 
     // Adjust the duration based on the beat unit

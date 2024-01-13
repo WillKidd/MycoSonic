@@ -4,34 +4,35 @@
 #include <Arduino.h>
 #include "LCD_HANDLER.h"
 
-const int MAX_MENU_ITEMS = 6; // Maximum number of child menu items
+const uint8_t MAX_MENU_ITEMS = 6; // Maximum number of child menu items
 
 enum MenuItemType { BASE_ITEM, SINGLE_TOGGLE_ITEM, MULTI_TOGGLE_ITEM, EDITABLE_ITEM };
-
 class MenuItem {
 public:
-    MenuItem(const String& name, MenuItemType type);
+    MenuItem(const char* name, MenuItemType type);
+    ~MenuItem();
 
     void addChild(MenuItem* child);
     void setParent(MenuItem* parent);
     MenuItem* getParent() const;
     MenuItem** getChildren();
-    int getChildCount() const;
-    const String& getName() const;
+    uint8_t getChildCount() const;
+    const char* getName() const;
     MenuItemType getType() const;
 
 
 private:
-    String itemName;
+    const char* itemName;
     MenuItemType itemType;
     MenuItem* parentItem;
-    MenuItem* childItems[MAX_MENU_ITEMS];
-    int childItemCount;
+    MenuItem** childItems;
+    uint8_t childItemCount;
+    uint8_t childItemCapacity;
 };
 
 class ToggleMenuItem : public MenuItem {
 public:
-    ToggleMenuItem(const String& name, bool& enabled, MenuItemType toggleType);
+    ToggleMenuItem(const char* name, bool& enabled, MenuItemType toggleType);
 
     void toggle();
     bool isEnabled() const;
@@ -43,7 +44,7 @@ private:
 
 class EditableMenuItem : public MenuItem {
 public:
-    EditableMenuItem(const String& name, float& parameter);
+    EditableMenuItem(const char* name, float& parameter);
 
     void setParameterValue(float value);
     float getParameterValue() const;
@@ -82,7 +83,7 @@ public:
 private:
     MenuItem* rootItem;
     MenuItem* currentItem;
-    int currentIndex;
+    uint8_t currentIndex;
     bool editMode;
     float originalValue;
     LCDHandler* lcdHandler; // Pointer to LCDHandler instance
