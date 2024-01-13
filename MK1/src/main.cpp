@@ -91,7 +91,7 @@ MenuItem inputItem(inputItemName, BASE_ITEM);
 ToggleMenuItem sensorItem(sensorItemName, useSensorData, SINGLE_TOGGLE_ITEM);
 ToggleMenuItem sdItem(sdItemName, useSDCardData, SINGLE_TOGGLE_ITEM);
 MenuItem inputFilterItem(inputFilterItemName, BASE_ITEM);
-ToggleMenuItem directInputItemName(movingAverageItemName, useMovingAverage, SINGLE_TOGGLE_ITEM);
+ToggleMenuItem directInputItemName(directInputItemName, useMovingAverage, SINGLE_TOGGLE_ITEM);
 ToggleMenuItem movingAverageItem(movingAverageItemName, useMovingAverage, SINGLE_TOGGLE_ITEM);
 ToggleMenuItem lowPassItem(lowPassItemName, useLowPass, SINGLE_TOGGLE_ITEM);
 ToggleMenuItem highPassItem(highPassItemName, useHighPass, SINGLE_TOGGLE_ITEM);
