@@ -6,7 +6,7 @@
 
 class InputHandler {
 public:
-    InputHandler(int okPin, int editPin, int backPin, int togglePin, int upPin, int downPin);
+    InputHandler();
     void update();
 
     bool isOkPressed() const;
@@ -17,8 +17,12 @@ public:
     bool isDownButtonPressed() const;
 
 private:
-    int okButtonPin, editButtonPin, backButtonPin, toggleButtonPin;
-    int upButtonPin, downButtonPin;
+    const uint8_t okButtonPin = 5;
+    const uint8_t editButtonPin = 4;
+    const uint8_t backButtonPin = 2;
+    const uint8_t toggleButtonPin = 6;
+    const uint8_t upButtonPin = 7;
+    const uint8_t downButtonPin = 8;
 
     // Bounce objects for debouncing
     Bounce okDebouncer, editDebouncer, backDebouncer, toggleDebouncer;

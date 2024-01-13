@@ -6,11 +6,15 @@
 #include "audio-math.h"
 #include "input_handler.h"
 #include "menu_system.h"
+#include <avr/pgmspace.h>
 
-const int bioSensorPin = A0;
+const uint8_t bioSensorPin = A0;
 
-bool useSensorData = true;
+// in data_handler
+//bool enableSDRead = false;
+//bool enableSDWrite = false;
 bool useSDCardData = false;
+bool useSensorData = true;
 
 bool useMovingAverage = true;
 bool useLowPass = false;
@@ -18,22 +22,22 @@ bool useHighPass = false;
 bool useNotch = false;
 bool useMedian = false;
 bool useKalman = false;
-int filterIndex = 0;
+uint8_t filterIndex = 0;
 
 bool logDataToSDCard = false;
 
 float dataValue;
-int bioValue;
+uint16_t bioValue;
 
 unsigned long lastChangeTime;
 bool isNotePlaying = true;
-int bpm = 120; // Example BPM
-int beatUnit = 4; // Assuming 4/4 time signature
-int defaultBeatUnit = 4; // Default beat unit for the time signature
+uint8_t bpm = 120; // Example BPM
+uint8_t beatUnit = 4; // Assuming 4/4 time signature
+uint8_t defaultBeatUnit = 4; // Default beat unit for the time signature
 
 // User-settable note and break durations (as note types, e.g., 4 for quarter note)
-int noteDurationType = 4; // Quarter note
-int breakDurationType = 4; // Quarter note
+uint8_t noteDurationType = 4; // Quarter note
+uint8_t breakDurationType = 4; // Quarter note
 
 float noteDuration; // Duration of a note in milliseconds
 float breakDuration; // Duration of a break in milliseconds
@@ -42,33 +46,83 @@ enum State { PLAYING, BREAK };
 State currentState = PLAYING;
 
 BaseWaveform* currentWaveform = nullptr;
-int currentFrequency = 220;
+uint16_t currentFrequency = 220;
 
-const int OK_BUTTON_PIN = 5;
-const int EDIT_BUTTON_PIN = 4;
-const int BACK_BUTTON_PIN = 2;
-const int TOGGLE_BUTTON_PIN = 6;
-const int ROTARY_PIN_A = 7;
-const int ROTARY_PIN_B = 8;
+const char rootItemName[] PROGMEM = "MycoSonic MK1";
+const char inputItemName[] PROGMEM = "Input";
+const char sensorItemName[] PROGMEM = "Sensor";
+const char sdItemName[] PROGMEM = "SDCardIn";
+const char inputFilterItemName[] PROGMEM = "Filter";
+const char directInputItemName[] PROGMEM = "DirectInput";
+const char movingAverageItemName[] PROGMEM = "MovingAverage";
+const char lowPassItemName[] PROGMEM = "LowPass";
+const char highPassItemName[] PROGMEM = "HighPass";
+const char notchItemName[] PROGMEM = "Notch";
+const char medianItemName[] PROGMEM = "Median";
+const char kalmanItemName[] PROGMEM = "Kalman";
+const char timingItemName[] PROGMEM = "Timing";
+const char BPMItemName[] PROGMEM = "BPM";
+const char noteDurationItemName[] PROGMEM = "NoteLength";
+const char breakDurationItemName[] PROGMEM = "BreakLength";
+const char signalMappingItemName[] PROGMEM = "Mapping";
+const char mapToScaleItemName[] PROGMEM = "MapToScale";
+const char mapToFullSpectrumItemName[] PROGMEM = "MapToFullSpectrum";
+const char dynamicRangeCompressionItemName[] PROGMEM = "DynamicRangeCompression";
+const char harmonicMappingItemName[] PROGMEM = "HarmonicMapping";
+const char outputFilterItemName[] PROGMEM = "Effects";
+const char phaseModulationEffectItemName[] PROGMEM = "PhaseMod.";
+const char tremoloEffectItemName[] PROGMEM = "Tremolo";
+const char bitCrusherEffectItemName[] PROGMEM = "BitCrusherEffect";
+const char ringModulatorEffectItemName[] PROGMEM = "RingModulator";
+const char flangerEffectItemName[] PROGMEM = "Flanger";
+const char pitchShiferEffectItemName[] PROGMEM = "PitchShifter";
+const char distortionEffectItemName[] PROGMEM = "Distortion";
+const char panEffectItemName[] PROGMEM = "Pan";
+const char vibratoEffectItemName[] PROGMEM = "Vibrato";
+const char leslieEffectItemName[] PROGMEM = "Leslie";
+const char outputItemName[] PROGMEM = "Output";
+const char audioOutputItemName[] PROGMEM = "AudioOut";
+const char sdCardOutputItemName[] PROGMEM = "SDCardOut";
+const char midiOutputItemName[] PROGMEM = "MidiOut";
 
-InputHandler inputHandler(OK_BUTTON_PIN, EDIT_BUTTON_PIN, BACK_BUTTON_PIN, TOGGLE_BUTTON_PIN, ROTARY_PIN_A, ROTARY_PIN_B);
-MenuItem rootItem("MycoSonic MK1", BASE_ITEM);
-MenuItem inputItem("Input", BASE_ITEM);
-ToggleMenuItem sensorItem("Sensor", useSensorData, SINGLE_TOGGLE_ITEM);
-ToggleMenuItem sdItem("SD", useSDCardData, SINGLE_TOGGLE_ITEM);
-MenuItem inputFilterItem("Filter", BASE_ITEM);
-ToggleMenuItem movingAverageItem("MA", useMovingAverage, SINGLE_TOGGLE_ITEM);
-ToggleMenuItem lowPassItem("LPF", useLowPass, SINGLE_TOGGLE_ITEM);
-ToggleMenuItem highPassItem("HPF", useHighPass, SINGLE_TOGGLE_ITEM);
-ToggleMenuItem notchItem("NF", useNotch, SINGLE_TOGGLE_ITEM);
-ToggleMenuItem medianItem("Mdn", useMedian, SINGLE_TOGGLE_ITEM);
-ToggleMenuItem kalmanItem("Klm", useKalman, SINGLE_TOGGLE_ITEM);
-MenuItem timingItem("Timing", BASE_ITEM);
-MenuItem signalMapping("Mapping", BASE_ITEM); 
-MenuItem outputFilterItem("Effects", BASE_ITEM);
-MenuItem outputItem("Output", BASE_ITEM);
+InputHandler inputHandler;
+MenuItem rootItem(rootItemName, BASE_ITEM);
+MenuItem inputItem(inputItemName, BASE_ITEM);
+ToggleMenuItem sensorItem(sensorItemName, useSensorData, SINGLE_TOGGLE_ITEM);
+ToggleMenuItem sdItem(sdItemName, useSDCardData, SINGLE_TOGGLE_ITEM);
+MenuItem inputFilterItem(inputFilterItemName, BASE_ITEM);
+ToggleMenuItem directInputItem(directInputItemName, useMovingAverage, SINGLE_TOGGLE_ITEM);
+ToggleMenuItem movingAverageItem(movingAverageItemName, useMovingAverage, SINGLE_TOGGLE_ITEM);
+ToggleMenuItem lowPassItem(lowPassItemName, useLowPass, SINGLE_TOGGLE_ITEM);
+ToggleMenuItem highPassItem(highPassItemName, useHighPass, SINGLE_TOGGLE_ITEM);
+ToggleMenuItem notchItem(notchItemName, useNotch, SINGLE_TOGGLE_ITEM);
+ToggleMenuItem medianItem(medianItemName, useMedian, SINGLE_TOGGLE_ITEM);
+ToggleMenuItem kalmanItem(kalmanItemName, useKalman, SINGLE_TOGGLE_ITEM);
+MenuItem timingItem(timingItemName, BASE_ITEM);
+MenuItem bpmItem(BPMItemName, BASE_ITEM);
+MenuItem noteDurationItem(noteDurationItemName, BASE_ITEM);
+MenuItem breakDurationItem(breakDurationItemName, BASE_ITEM);
+MenuItem signalMappingItem(signalMappingItemName, BASE_ITEM); 
+MenuItem mapToScaleItem(mapToScaleItemName, BASE_ITEM); 
+MenuItem mapToFullSpectrumItem(mapToFullSpectrumItemName, BASE_ITEM);
+MenuItem dynamicRangeCompressionItem(dynamicRangeCompressionItemName, BASE_ITEM); 
+MenuItem harmonicMappingItem(harmonicMappingItemName, BASE_ITEM); 
+MenuItem outputFilterItem(outputFilterItemName, BASE_ITEM);
+MenuItem phaseModulationEffectItem(phaseModulationEffectItemName, BASE_ITEM);
+MenuItem tremoloEffectItem(tremoloEffectItemName, BASE_ITEM);
+MenuItem bitCrusherEffectItem(bitCrusherEffectItemName, BASE_ITEM);
+MenuItem ringModulatorEffectItem(ringModulatorEffectItemName, BASE_ITEM);
+MenuItem flangerEffectItem(flangerEffectItemName, BASE_ITEM);
+MenuItem pitchShiferEffectItem(pitchShiferEffectItemName, BASE_ITEM);
+MenuItem distortionEffectItem(distortionEffectItemName, BASE_ITEM);
+MenuItem panEffectItem(panEffectItemName, BASE_ITEM);
+MenuItem vibratoEffectItem(vibratoEffectItemName, BASE_ITEM);
+MenuItem leslieEffectItem(leslieEffectItemName, BASE_ITEM);
+MenuItem outputItem(outputItemName, BASE_ITEM);
+MenuItem audioOutputItem(audioOutputItemName, BASE_ITEM);
+MenuItem sdCardOutputItem(sdCardOutputItemName, BASE_ITEM);
+MenuItem midiOutputItem(midiOutputItemName, BASE_ITEM);
 MenuHandler menuHandler(&rootItem);
-
 
 void setup() {
   Serial.begin(9600);
@@ -94,7 +148,7 @@ void setup() {
   inputFilterItem.addChild(&medianItem);
   inputFilterItem.addChild(&kalmanItem);
   rootItem.addChild(&timingItem);
-  rootItem.addChild(&signalMapping); 
+  rootItem.addChild(&signalMappingItem); 
   rootItem.addChild(&outputFilterItem);
   rootItem.addChild(&outputItem);
   menuHandler.setLCDHandler(&lcdHandler);

@@ -1,8 +1,7 @@
 #include "INPUT_HANDLER.h"
 
-InputHandler::InputHandler(int okPin, int editPin, int backPin, int togglePin, int upPin, int downPin)
-    : okButtonPin(okPin), editButtonPin(editPin), backButtonPin(backPin), toggleButtonPin(togglePin),
-      upButtonPin(upPin), downButtonPin(downPin) {
+InputHandler::InputHandler()
+{
 
     // Initialize pins with internal pull-up resistors
     pinMode(okButtonPin, INPUT);
