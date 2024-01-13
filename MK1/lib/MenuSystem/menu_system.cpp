@@ -71,8 +71,8 @@ MenuItemType MenuItem::getType() const {
 ToggleMenuItem::ToggleMenuItem(const char* name, bool& enabledParam, MenuItemType toggleType)
     : MenuItem(name, toggleType), enabled(enabledParam) {}
 
-void ToggleMenuItem::toggle() {
-    enabled = !enabled;
+void ToggleMenuItem::setEnabled(bool enable) {
+    enabled = enable;
 }
 
 bool ToggleMenuItem::isEnabled() const {
@@ -154,18 +154,18 @@ void MenuHandler::toggleCurrentItem() {
     if (item->getType() == SINGLE_TOGGLE_ITEM) {
         // Logic for SingleToggleMenuItem
         // Disable all toggleable siblings
-        for (uint8_t i = 0; i < currentItem->getParent()->getChildCount(); ++i) {
+        for (int i = 0; i < currentItem->getParent()->getChildCount(); ++i) {
             MenuItem* sibling = currentItem->getParent()->getChildren()[i];
             if ((sibling->getType() == SINGLE_TOGGLE_ITEM || sibling->getType() == MULTI_TOGGLE_ITEM) && sibling != item) {
-                static_cast<ToggleMenuItem*>(sibling)->toggle(); // Disable sibling
+                static_cast<ToggleMenuItem*>(sibling)->setEnabled(false); // Disable sibling
             }
         }
-        static_cast<ToggleMenuItem*>(item)->toggle(); // Toggle current item
+        static_cast<ToggleMenuItem*>(item)->setEnabled(true); // Enable current item
     } else if (item->getType() == MULTI_TOGGLE_ITEM) {
         // Logic for MultiToggleMenuItem
-        // Ensure no SingleToggleMenuItem is enabled among siblings
+        // Check if any SingleToggleMenuItem is enabled among siblings
         bool singleToggleActive = false;
-        for (uint8_t i = 0; i < currentItem->getParent()->getChildCount(); ++i) {
+        for (int i = 0; i < currentItem->getParent()->getChildCount(); ++i) {
             MenuItem* sibling = currentItem->getParent()->getChildren()[i];
             if (sibling->getType() == SINGLE_TOGGLE_ITEM && static_cast<ToggleMenuItem*>(sibling)->isEnabled()) {
                 singleToggleActive = true;
@@ -173,7 +173,9 @@ void MenuHandler::toggleCurrentItem() {
             }
         }
         if (!singleToggleActive) {
-            static_cast<ToggleMenuItem*>(item)->toggle(); // Toggle current item
+            static_cast<ToggleMenuItem*>(item)->setEnabled(true); // Enable current item if no SingleToggleItem is active
+        } else {
+            static_cast<ToggleMenuItem*>(item)->setEnabled(false); // Disable if any SingleToggleItem is active
         }
     }
     // If it's neither, do nothing

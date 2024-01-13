@@ -34,7 +34,7 @@ class ToggleMenuItem : public MenuItem {
 public:
     ToggleMenuItem(const char* name, bool& enabled, MenuItemType toggleType);
 
-    void toggle();
+    void setEnabled(bool enable);
     bool isEnabled() const;
     MenuItem* childItems[0];
 
