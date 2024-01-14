@@ -1,12 +1,19 @@
 #include "audio-math.h"
 
-float midiNoteToFrequency(uint8_t midiNumber) {
+uint16_t midiNoteToFrequency(uint8_t midiNumber) {
     // Bounds checking
     if (midiNumber < MIN_MIDI_NOTE) midiNumber = MIN_MIDI_NOTE;
     if (midiNumber > MAX_MIDI_NOTE) midiNumber = MAX_MIDI_NOTE;
 
-    // Calculate frequency
-    return A4_FREQ * pow(SEMITONE_RATIO, midiNumber - MIDI_NOTE_A4);
+    // Calculate frequency in float
+    float frequency = A4_FREQ * pow(SEMITONE_RATIO, midiNumber - MIDI_NOTE_A4);
+
+    // Scale frequency to fit in uint16_t
+    float maxFrequency = A4_FREQ * pow(SEMITONE_RATIO, MAX_MIDI_NOTE - MIDI_NOTE_A4);
+    float scalingFactor = maxFrequency / 65535;
+    uint16_t scaledFrequency = (uint16_t)(frequency / scalingFactor);
+
+    return scaledFrequency;
 }
 
 // Function to calculate MIDI note number from frequency
@@ -25,7 +32,7 @@ uint8_t frequencyToMIDINote(float frequency) {
 }
 
 // Function to map input to a scale in a certain key
-float mapToScale(uint16_t input, uint16_t inputMin, uint16_t inputMax, uint8_t keyRootMidiNote, const uint8_t intervals[], uint8_t numIntervals) {
+uint16_t mapToScale(uint16_t input, uint16_t inputMin, uint16_t inputMax, uint8_t keyRootMidiNote, const uint8_t intervals[], uint8_t numIntervals) {
     uint8_t totalRange = MAX_MIDI_NOTE - MIN_MIDI_NOTE + 1;
     uint16_t totalNotesInScale = (totalRange / numIntervals) * numIntervals;
 
@@ -41,12 +48,13 @@ float mapToScale(uint16_t input, uint16_t inputMin, uint16_t inputMax, uint8_t k
     
     return midiNoteToFrequency(midiNote);
 }
+
 /*
 uint16_t
 uint8_t
 */
 // Function for full spectrum mapping
-float mapToFullSpectrum(uint16_t input, uint16_t inputMin, uint16_t inputMax) {
+uint16_t mapToFullSpectrum(uint16_t input, uint16_t inputMin, uint16_t inputMax) {
     uint8_t midiNumber = map(input, inputMin, inputMax, MIN_MIDI_NOTE, MAX_MIDI_NOTE);
     return midiNoteToFrequency(midiNumber);
 }
@@ -61,12 +69,19 @@ float dynamicRangeCompressionMapping(uint16_t input, uint16_t inputMin, uint16_t
 }
 
 // Function for harmonic mapping
-float harmonicMapping(uint16_t input, uint16_t inputMin, uint16_t inputMax, float baseFrequency) {
+uint16_t harmonicMapping(uint16_t input, uint16_t inputMin, uint16_t inputMax, uint16_t baseFrequency) {
     // Normalize input to a harmonic index (1st, 2nd, 3rd harmonic, etc.)
-    uint8_t harmonicIndex = map(input, inputMin, inputMax, 1, 10); // Example range: 1st to 10th harmonic
+    uint8_t harmonicIndex = map(input, inputMin, inputMax, 1, 10);
 
     // Calculate the frequency of the specified harmonic
-    return baseFrequency * harmonicIndex;
+    // Since baseFrequency is already scaled, the harmonic frequency must be calculated accordingly
+    uint32_t harmonicFrequency = (uint32_t)baseFrequency * harmonicIndex;
+    
+    // Ensure the result fits within the uint16_t range
+    if (harmonicFrequency > 65535) {
+        harmonicFrequency = 65535;
+    }
+    return (uint16_t)harmonicFrequency;
 }
 
 /*
