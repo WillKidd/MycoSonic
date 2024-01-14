@@ -10,21 +10,40 @@
 
 const uint8_t bioSensorPin = A0;
 
-// in data_handler
-//bool enableSDRead = false;
-//bool enableSDWrite = false;
-bool useSDCardData = false;
-bool useSensorData = true;
+bool useSDCardInput = false;
+bool useSensorInput = true;
 
+bool useInputFilter = true;
 bool useMovingAverage = true;
 bool useLowPass = false;
 bool useHighPass = false;
 bool useNotch = false;
 bool useMedian = false;
 bool useKalman = false;
+
+bool useMapToScale = false;
+bool useMapToFullSpectrum  = true;
+bool useDynamicRangeCompression  = false;
+bool useHarmonicMapping  = false;
+
+bool useEffects = false;
+bool usePhaseModulation = false;
+bool useTremolo = false;
+bool useBitCrusher = false;
+bool useRingModulator = false;
+bool useFlanger = false;
+bool usePitchShifer = false;
+bool useDistortion = false;
+bool usePan = false;
+bool useVibrato = false;
+bool useLeslie = false;
+
+bool useAudioOutput = true;
+bool useSDCardOutput = false;
+bool useMidiOutput = false;
+
 uint8_t filterIndex = 0;
 
-bool logDataToSDCard = false;
 
 float dataValue;
 uint16_t bioValue;
@@ -52,6 +71,7 @@ const char rootItemName[] PROGMEM = "MycoSonic MK1";
 const char inputItemName[] PROGMEM = "Input";
 const char sensorItemName[] PROGMEM = "Sensor";
 const char sdItemName[] PROGMEM = "SDCard";
+
 const char inputFilterItemName[] PROGMEM = "Filter";
 const char directInputItemName[] PROGMEM = "DirectInput";
 const char movingAverageItemName[] PROGMEM = "MovingAverage";
@@ -60,15 +80,18 @@ const char highPassItemName[] PROGMEM = "HighPass";
 const char notchItemName[] PROGMEM = "Notch";
 const char medianItemName[] PROGMEM = "Median";
 const char kalmanItemName[] PROGMEM = "Kalman";
+
 const char timingItemName[] PROGMEM = "Timing";
 const char BPMItemName[] PROGMEM = "BPM";
 const char noteDurationItemName[] PROGMEM = "NoteLength";
 const char breakDurationItemName[] PROGMEM = "BreakLength";
+
 const char signalMappingItemName[] PROGMEM = "Mapping";
 const char mapToScaleItemName[] PROGMEM = "MapToScale";
 const char mapToFullSpectrumItemName[] PROGMEM = "MapToFullSpec.";
 const char dynamicRangeCompressionItemName[] PROGMEM = "DRC";
-const char harmonicMappingItemName[] PROGMEM = "HarmonicMapping";
+const char harmonicMappingItemName[] PROGMEM = "Harmonic";
+
 const char outputFilterItemName[] PROGMEM = "Effects";
 const char phaseModulationEffectItemName[] PROGMEM = "PhaseMod.";
 const char tremoloEffectItemName[] PROGMEM = "Tremolo";
@@ -80,6 +103,7 @@ const char distortionEffectItemName[] PROGMEM = "Distortion";
 const char panEffectItemName[] PROGMEM = "Pan";
 const char vibratoEffectItemName[] PROGMEM = "Vibrato";
 const char leslieEffectItemName[] PROGMEM = "Leslie";
+
 const char outputItemName[] PROGMEM = "Output";
 const char audioOutputItemName[] PROGMEM = "AudioOut";
 const char sdCardOutputItemName[] PROGMEM = "SDCardOut";
@@ -87,41 +111,46 @@ const char midiOutputItemName[] PROGMEM = "MidiOut";
 
 InputHandler inputHandler;
 MenuItem rootItem(rootItemName, BASE_ITEM);
+
 MenuItem inputItem(inputItemName, BASE_ITEM);
-ToggleMenuItem sensorItem(sensorItemName, useSensorData, SINGLE_TOGGLE_ITEM);
-ToggleMenuItem sdItem(sdItemName, useSDCardData, SINGLE_TOGGLE_ITEM);
-MenuItem inputFilterItem(inputFilterItemName, BASE_ITEM);
-ToggleMenuItem directInputItem(directInputItemName, useMovingAverage, SINGLE_TOGGLE_ITEM);
+ToggleMenuItem sensorItem(sensorItemName, useSDCardInput, SINGLE_TOGGLE_ITEM);
+ToggleMenuItem sdItem(sdItemName, useSensorInput, SINGLE_TOGGLE_ITEM);
+
+ToggleMenuItem inputFilterItem(inputFilterItemName, useInputFilter, MULTI_TOGGLE_ITEM);
 ToggleMenuItem movingAverageItem(movingAverageItemName, useMovingAverage, SINGLE_TOGGLE_ITEM);
 ToggleMenuItem lowPassItem(lowPassItemName, useLowPass, SINGLE_TOGGLE_ITEM);
 ToggleMenuItem highPassItem(highPassItemName, useHighPass, SINGLE_TOGGLE_ITEM);
 ToggleMenuItem notchItem(notchItemName, useNotch, SINGLE_TOGGLE_ITEM);
 ToggleMenuItem medianItem(medianItemName, useMedian, SINGLE_TOGGLE_ITEM);
 ToggleMenuItem kalmanItem(kalmanItemName, useKalman, SINGLE_TOGGLE_ITEM);
+
 MenuItem timingItem(timingItemName, BASE_ITEM);
-MenuItem bpmItem(BPMItemName, BASE_ITEM);
-MenuItem noteDurationItem(noteDurationItemName, BASE_ITEM);
-MenuItem breakDurationItem(breakDurationItemName, BASE_ITEM);
+EditableMenuItemSingleUint8 bpmItem(BPMItemName,  bpm);
+EditableMenuItemSingleUint8 noteDurationItem(noteDurationItemName, noteDurationType);
+EditableMenuItemSingleUint8 breakDurationItem(breakDurationItemName, breakDurationType);
+
 MenuItem signalMappingItem(signalMappingItemName, BASE_ITEM); 
-MenuItem mapToScaleItem(mapToScaleItemName, BASE_ITEM); 
-MenuItem mapToFullSpectrumItem(mapToFullSpectrumItemName, BASE_ITEM);
-MenuItem dynamicRangeCompressionItem(dynamicRangeCompressionItemName, BASE_ITEM); 
-MenuItem harmonicMappingItem(harmonicMappingItemName, BASE_ITEM); 
-MenuItem outputFilterItem(outputFilterItemName, BASE_ITEM);
-MenuItem phaseModulationEffectItem(phaseModulationEffectItemName, BASE_ITEM);
-MenuItem tremoloEffectItem(tremoloEffectItemName, BASE_ITEM);
-MenuItem bitCrusherEffectItem(bitCrusherEffectItemName, BASE_ITEM);
-MenuItem ringModulatorEffectItem(ringModulatorEffectItemName, BASE_ITEM);
-MenuItem flangerEffectItem(flangerEffectItemName, BASE_ITEM);
-MenuItem pitchShiferEffectItem(pitchShiferEffectItemName, BASE_ITEM);
-MenuItem distortionEffectItem(distortionEffectItemName, BASE_ITEM);
-MenuItem panEffectItem(panEffectItemName, BASE_ITEM);
-MenuItem vibratoEffectItem(vibratoEffectItemName, BASE_ITEM);
-MenuItem leslieEffectItem(leslieEffectItemName, BASE_ITEM);
+ToggleMenuItem mapToScaleItem(mapToScaleItemName, useMapToScale, SINGLE_TOGGLE_ITEM); 
+ToggleMenuItem mapToFullSpectrumItem(mapToFullSpectrumItemName, useMapToFullSpectrum, SINGLE_TOGGLE_ITEM);
+ToggleMenuItem dynamicRangeCompressionItem(dynamicRangeCompressionItemName, useDynamicRangeCompression, SINGLE_TOGGLE_ITEM); 
+ToggleMenuItem harmonicMappingItem(harmonicMappingItemName, useHarmonicMapping, SINGLE_TOGGLE_ITEM); 
+
+ToggleMenuItem outputFilterItem(outputFilterItemName, useEffects, MULTI_TOGGLE_ITEM);
+ToggleMenuItem phaseModulationEffectItem(phaseModulationEffectItemName, usePhaseModulation, MULTI_TOGGLE_ITEM);
+ToggleMenuItem tremoloEffectItem(tremoloEffectItemName, useTremolo, MULTI_TOGGLE_ITEM);
+ToggleMenuItem bitCrusherEffectItem(bitCrusherEffectItemName, useBitCrusher, MULTI_TOGGLE_ITEM);
+ToggleMenuItem ringModulatorEffectItem(ringModulatorEffectItemName, useRingModulator, MULTI_TOGGLE_ITEM);
+ToggleMenuItem flangerEffectItem(flangerEffectItemName, useFlanger, MULTI_TOGGLE_ITEM);
+ToggleMenuItem pitchShiferEffectItem(pitchShiferEffectItemName, usePitchShifer, MULTI_TOGGLE_ITEM);
+ToggleMenuItem distortionEffectItem(distortionEffectItemName, useDistortion, MULTI_TOGGLE_ITEM);
+ToggleMenuItem panEffectItem(panEffectItemName, usePan, MULTI_TOGGLE_ITEM);
+ToggleMenuItem vibratoEffectItem(vibratoEffectItemName, useVibrato, MULTI_TOGGLE_ITEM);
+ToggleMenuItem leslieEffectItem(leslieEffectItemName, useLeslie, MULTI_TOGGLE_ITEM);
+
 MenuItem outputItem(outputItemName, BASE_ITEM);
-MenuItem audioOutputItem(audioOutputItemName, BASE_ITEM);
-MenuItem sdCardOutputItem(sdCardOutputItemName, BASE_ITEM);
-MenuItem midiOutputItem(midiOutputItemName, BASE_ITEM);
+ToggleMenuItem audioOutputItem(audioOutputItemName, useAudioOutput, SINGLE_TOGGLE_ITEM);
+ToggleMenuItem sdCardOutputItem(sdCardOutputItemName, useSDCardOutput, SINGLE_TOGGLE_ITEM);
+ToggleMenuItem midiOutputItem(midiOutputItemName, useMidiOutput, SINGLE_TOGGLE_ITEM);
 MenuHandler menuHandler(&rootItem);
 
 void setup() {

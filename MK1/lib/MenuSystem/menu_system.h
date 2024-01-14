@@ -6,7 +6,7 @@
 
 const uint8_t MAX_MENU_ITEMS = 6; // Maximum number of child menu items
 
-enum MenuItemType { BASE_ITEM, SINGLE_TOGGLE_ITEM, MULTI_TOGGLE_ITEM, EDITABLE_ITEM };
+enum MenuItemType { BASE_ITEM, SINGLE_TOGGLE_ITEM, MULTI_TOGGLE_ITEM, EDITABLE_ITEM, EDITABLE_UINT8_ITEM };
 class MenuItem {
 public:
     MenuItem(const char* name, MenuItemType type);
@@ -45,15 +45,23 @@ private:
 class EditableMenuItem : public MenuItem {
 public:
     EditableMenuItem(const char* name, float& parameter);
-
     void setParameterValue(float value);
     float getParameterValue() const;
     String getFormattedValue() const;
 
-
 private:
     float& parameter;
-    MenuItem* childItems[0];
+};
+
+class EditableMenuItemSingleUint8 : public MenuItem {
+public:
+    EditableMenuItemSingleUint8(const char* name, uint8_t& parameter);
+    void setParameterValue(uint8_t value);
+    uint8_t getParameterValue() const;
+    String getFormattedValue() const;
+
+private:
+    uint8_t& parameter;
 };
 
 class MenuHandler {
@@ -77,6 +85,7 @@ public:
     void discardChanges();
 
     void setLCDHandler(LCDHandler* lcd); // Method to set the LCDHandler
+    void updateParameterValueUint8(int8_t delta); // New method
     void displayCurrentItem() const; // Method to display the current menu item using LCD
 
 

@@ -84,6 +84,9 @@ EditableMenuItem::EditableMenuItem(const char* name, float& param)
     : MenuItem(name, EDITABLE_ITEM), parameter(param) {}
 
 void EditableMenuItem::setParameterValue(float value) {
+    // Ensure the value is within the specified range
+    if (value < 0.0f) value = 0.0f;
+    else if (value > 99.9f) value = 99.9f;
     parameter = value;
 }
 
@@ -92,8 +95,25 @@ float EditableMenuItem::getParameterValue() const {
 }
 
 String EditableMenuItem::getFormattedValue() const {
-    char buffer[10]; // Buffer to hold the formatted string
-    dtostrf(parameter, 4, 2, buffer); // Convert float to string with 2 decimal places
+    char buffer[5]; // Buffer size for "XX.X" format
+    snprintf(buffer, sizeof(buffer), "%4.1f", parameter);
+    return String(buffer);
+}
+
+EditableMenuItemSingleUint8::EditableMenuItemSingleUint8(const char* name, uint8_t& param)
+    : MenuItem(name, EDITABLE_UINT8_ITEM), parameter(param) {}
+
+void EditableMenuItemSingleUint8::setParameterValue(uint8_t value) {
+    parameter = value;
+}
+
+uint8_t EditableMenuItemSingleUint8::getParameterValue() const {
+    return parameter;
+}
+
+String EditableMenuItemSingleUint8::getFormattedValue() const {
+    char buffer[4];
+    snprintf(buffer, sizeof(buffer), "%u", parameter);
     return String(buffer);
 }
 
@@ -114,7 +134,6 @@ void MenuHandler::nextItem() {
     }
 }
 
-
 void MenuHandler::previousItem() {
     MenuItem* parent = currentItem->getParent();
     if (parent != nullptr) {
@@ -128,7 +147,6 @@ void MenuHandler::previousItem() {
         }
     }
 }
-
 
 void MenuHandler::selectItem() {
     if (currentItem->getChildCount() > 0) {
@@ -226,6 +244,16 @@ void MenuHandler::setLCDHandler(LCDHandler* lcd) {
     lcdHandler = lcd;
 }
 
+void MenuHandler::updateParameterValueUint8(int8_t delta) {
+    if (editMode && currentItem->getType() == EDITABLE_UINT8_ITEM) {
+        auto editableItem = static_cast<EditableMenuItemSingleUint8*>(currentItem);
+        int newValue = static_cast<int>(editableItem->getParameterValue()) + delta;
+        if (newValue >= 0 && newValue <= UINT8_MAX) {
+            editableItem->setParameterValue(static_cast<uint8_t>(newValue));
+        }
+    }
+}
+
 void MenuHandler::displayCurrentItem() const {
     if (!lcdHandler) return; // Check if LCDHandler is set
     char buffer[16]; // Buffer for storing strings read from PROGMEM
@@ -259,8 +287,16 @@ void MenuHandler::displayCurrentItem() const {
             lcdHandler->displayText(editableItem->getFormattedValue(), 7, 1);
             break;
         }
-        case BASE_ITEM:
-        break;
+        case EDITABLE_UINT8_ITEM: {
+            auto editableUint8Item = static_cast<EditableMenuItemSingleUint8*>(currentItem);
+            copyProgMemString(strValue, buffer, sizeof(buffer));
+            lcdHandler->displayText(buffer, 0, 1);
+            lcdHandler->displayText(editableUint8Item->getFormattedValue(), 7, 1);
+            break;
+        }
+        case BASE_ITEM:{
+            break;
+        }
         // ... handle other item types as needed ...
     }
 }
