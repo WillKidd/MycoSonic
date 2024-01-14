@@ -4,7 +4,6 @@
 #include <Arduino.h>
 #include "LCD_HANDLER.h"
 
-const uint8_t MAX_MENU_ITEMS = 6; // Maximum number of child menu items
 
 enum MenuItemType { BASE_ITEM, SINGLE_TOGGLE_ITEM, MULTI_TOGGLE_ITEM, EDITABLE_ITEM, EDITABLE_UINT8_ITEM };
 class MenuItem {
@@ -84,8 +83,8 @@ public:
     void saveChanges();
     void discardChanges();
 
-    void setLCDHandler(LCDHandler* lcd); // Method to set the LCDHandler
-    void updateParameterValueUint8(int8_t delta); // New method
+    void setLCDHandler(LCDHandler* lcd);
+    void updateParameterValueUint8(int8_t delta);
     void displayCurrentItem() const; // Method to display the current menu item using LCD
 
 
@@ -94,8 +93,9 @@ private:
     MenuItem* currentItem;
     uint8_t currentIndex;
     bool editMode;
-    float originalValue;
-    LCDHandler* lcdHandler; // Pointer to LCDHandler instance
+    float originalValue; // This stores the original value for float parameters
+    uint8_t originalUint8Value;  // This stores the original value for uint8_t parameters
+    LCDHandler* lcdHandler;
 };
 
 #endif

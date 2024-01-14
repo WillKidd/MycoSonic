@@ -1,6 +1,6 @@
 #include <Arduino.h>
 #include "signal_processing.h"
-//#include "data_handler.h"
+// #include "data_handler.h"
 #include <SPI.h>
 #include "mozzi-audio.h"
 #include "audio-math.h"
@@ -10,8 +10,8 @@
 
 const uint8_t bioSensorPin = A0;
 
-bool useSDCardInput = false;
-bool useSensorInput = true;
+bool useSDCardInput = true;
+bool useSensorInput = false;
 
 bool useInputFilter = true;
 bool useMovingAverage = true;
@@ -22,9 +22,9 @@ bool useMedian = false;
 bool useKalman = false;
 
 bool useMapToScale = false;
-bool useMapToFullSpectrum  = true;
-bool useDynamicRangeCompression  = false;
-bool useHarmonicMapping  = false;
+bool useMapToFullSpectrum = true;
+bool useDynamicRangeCompression = false;
+bool useHarmonicMapping = false;
 
 bool useEffects = false;
 bool usePhaseModulation = false;
@@ -44,27 +44,30 @@ bool useMidiOutput = false;
 
 uint8_t filterIndex = 0;
 
-
 float dataValue;
 uint16_t bioValue;
 
 unsigned long lastChangeTime;
 bool isNotePlaying = true;
-uint8_t bpm = 120; // Example BPM
-uint8_t beatUnit = 4; // Assuming 4/4 time signature
+uint8_t bpm = 120;           // Example BPM
+uint8_t beatUnit = 4;        // Assuming 4/4 time signature
 uint8_t defaultBeatUnit = 4; // Default beat unit for the time signature
 
 // User-settable note and break durations (as note types, e.g., 4 for quarter note)
-uint8_t noteDurationType = 4; // Quarter note
+uint8_t noteDurationType = 4;  // Quarter note
 uint8_t breakDurationType = 4; // Quarter note
 
-float noteDuration; // Duration of a note in milliseconds
+float noteDuration;  // Duration of a note in milliseconds
 float breakDuration; // Duration of a break in milliseconds
 
-enum State { PLAYING, BREAK };
+enum State
+{
+  PLAYING,
+  BREAK
+};
 State currentState = PLAYING;
 
-BaseWaveform* currentWaveform = nullptr;
+BaseWaveform *currentWaveform = nullptr;
 uint16_t currentFrequency = 220;
 
 const char rootItemName[] PROGMEM = "MycoSonic MK1";
@@ -72,7 +75,7 @@ const char inputItemName[] PROGMEM = "Input";
 const char sensorItemName[] PROGMEM = "Sensor";
 const char sdItemName[] PROGMEM = "SDCard";
 
-const char inputFilterItemName[] PROGMEM = "Filter";
+const char inputFilterItemName[] PROGMEM = "Filters";
 const char directInputItemName[] PROGMEM = "DirectInput";
 const char movingAverageItemName[] PROGMEM = "MovingAverage";
 const char lowPassItemName[] PROGMEM = "LowPass";
@@ -125,15 +128,15 @@ ToggleMenuItem medianItem(medianItemName, useMedian, SINGLE_TOGGLE_ITEM);
 ToggleMenuItem kalmanItem(kalmanItemName, useKalman, SINGLE_TOGGLE_ITEM);
 
 MenuItem timingItem(timingItemName, BASE_ITEM);
-EditableMenuItemSingleUint8 bpmItem(BPMItemName,  bpm);
+EditableMenuItemSingleUint8 bpmItem(BPMItemName, bpm);
 EditableMenuItemSingleUint8 noteDurationItem(noteDurationItemName, noteDurationType);
 EditableMenuItemSingleUint8 breakDurationItem(breakDurationItemName, breakDurationType);
 
-MenuItem signalMappingItem(signalMappingItemName, BASE_ITEM); 
-ToggleMenuItem mapToScaleItem(mapToScaleItemName, useMapToScale, SINGLE_TOGGLE_ITEM); 
+MenuItem signalMappingItem(signalMappingItemName, BASE_ITEM);
+ToggleMenuItem mapToScaleItem(mapToScaleItemName, useMapToScale, SINGLE_TOGGLE_ITEM);
 ToggleMenuItem mapToFullSpectrumItem(mapToFullSpectrumItemName, useMapToFullSpectrum, SINGLE_TOGGLE_ITEM);
-ToggleMenuItem dynamicRangeCompressionItem(dynamicRangeCompressionItemName, useDynamicRangeCompression, SINGLE_TOGGLE_ITEM); 
-ToggleMenuItem harmonicMappingItem(harmonicMappingItemName, useHarmonicMapping, SINGLE_TOGGLE_ITEM); 
+ToggleMenuItem dynamicRangeCompressionItem(dynamicRangeCompressionItemName, useDynamicRangeCompression, SINGLE_TOGGLE_ITEM);
+ToggleMenuItem harmonicMappingItem(harmonicMappingItemName, useHarmonicMapping, SINGLE_TOGGLE_ITEM);
 
 ToggleMenuItem outputFilterItem(outputFilterItemName, useEffects, MULTI_TOGGLE_ITEM);
 ToggleMenuItem phaseModulationEffectItem(phaseModulationEffectItemName, usePhaseModulation, MULTI_TOGGLE_ITEM);
@@ -153,9 +156,10 @@ ToggleMenuItem sdCardOutputItem(sdCardOutputItemName, useSDCardOutput, SINGLE_TO
 ToggleMenuItem midiOutputItem(midiOutputItemName, useMidiOutput, SINGLE_TOGGLE_ITEM);
 MenuHandler menuHandler(&rootItem);
 
-void setup() {
+void setup()
+{
   Serial.begin(9600);
-  //initSDCard();
+  // initSDCard();
   startMozzi(64);
 
   noteDuration = noteDurationToTime(noteDurationType, bpm, beatUnit, defaultBeatUnit);
@@ -165,7 +169,7 @@ void setup() {
   lastChangeTime = millis();
   LCDHandler lcdHandler(0x27, 16, 2);
   lcdHandler.init();
-  
+
   rootItem.addChild(&inputItem);
   inputItem.addChild(&sensorItem);
   inputItem.addChild(&sdItem);
@@ -180,7 +184,7 @@ void setup() {
   timingItem.addChild(&bpmItem);
   timingItem.addChild(&noteDurationItem);
   timingItem.addChild(&breakDurationItem);
-  rootItem.addChild(&signalMappingItem); 
+  rootItem.addChild(&signalMappingItem);
   signalMappingItem.addChild(&mapToScaleItem);
   signalMappingItem.addChild(&mapToFullSpectrumItem);
   signalMappingItem.addChild(&dynamicRangeCompressionItem);
@@ -203,97 +207,140 @@ void setup() {
   menuHandler.setLCDHandler(&lcdHandler);
   menuHandler.selectItem();
   menuHandler.displayCurrentItem();
-  //Serial.println(inputItem.getName());
+  // Serial.println(inputItem.getName());
 }
 
-void loop(){
+void loop()
+{
   audioHook();
 }
 
-
-void updateControl(){
+void updateControl()
+{
   unsigned long currentTime = millis();
-  
+
   inputHandler.update();
-  if (inputHandler.isOkPressed()) {
-    //Serial.println("OK");
-    if (menuHandler.isEditMode()) {
-        menuHandler.saveChanges(); // Save changes if in edit mode
-        menuHandler.exitEditMode(); // Exit edit mode
+  if (inputHandler.isOkPressed())
+  {
+    // Serial.println("OK");
+    if (menuHandler.isEditMode())
+    {
+      menuHandler.saveChanges();  // Save changes if in edit mode
+      menuHandler.exitEditMode(); // Exit edit mode
     }
-    //Serial.println(menuHandler.getCurrentItem()->getName());
+    // Serial.println(menuHandler.getCurrentItem()->getName());
     menuHandler.displayCurrentItem();
   }
-  else if (inputHandler.isEditPressed()) {
-      //Serial.println("EDIT");
-      menuHandler.enterEditMode(); // Enter edit mode
-      menuHandler.selectItem();
-      //Serial.println(menuHandler.getCurrentItem()->getName());
-      menuHandler.displayCurrentItem();
-  }
-  else if (inputHandler.isBackPressed()) {
-      //Serial.println("BACK");
-    if (menuHandler.isEditMode()) {
-        menuHandler.discardChanges(); // Discard changes if in edit mode
-        menuHandler.exitEditMode(); // Exit edit mode
-        menuHandler.back();
+else if (inputHandler.isEditPressed()) {
+    MenuItem* currentItem = menuHandler.getCurrentItem();
+    if (currentItem->getType() == EDITABLE_ITEM || currentItem->getType() == EDITABLE_UINT8_ITEM) {
+        // If the current item is editable, enter edit mode
+        menuHandler.enterEditMode();
     } else {
-        menuHandler.back(); // Navigate back in the menu
+        // For non-editable items, just select the item
+        menuHandler.selectItem();
     }
-    //Serial.println(menuHandler.getCurrentItem()->getName());
+    //Serial.println(currentItem->getName());
+    menuHandler.displayCurrentItem();
+}
+
+  else if (inputHandler.isBackPressed())
+  {
+    // Serial.println("BACK");
+    if (menuHandler.isEditMode())
+    {
+      menuHandler.discardChanges(); // Discard changes if in edit mode
+      menuHandler.exitEditMode();   // Exit edit mode
+      menuHandler.back();
+    }
+    else
+    {
+      menuHandler.back(); // Navigate back in the menu
+    }
+    // Serial.println(menuHandler.getCurrentItem()->getName());
     menuHandler.displayCurrentItem();
   }
-  else if (inputHandler.isToggleButtonPressed()) {
-    //Serial.println("TOGGLE");
-    if (!menuHandler.isEditMode()){
+  else if (inputHandler.isToggleButtonPressed())
+  {
+    // Serial.println("TOGGLE");
+    if (!menuHandler.isEditMode())
+    {
       menuHandler.toggleCurrentItem(); // Toggle the current item
     }
-    //Serial.println(menuHandler.getCurrentItem()->getName());
+    // Serial.println(menuHandler.getCurrentItem()->getName());
     menuHandler.displayCurrentItem();
   }
- else if (inputHandler.isUpButtonPressed()) {
-    if (menuHandler.isEditMode()) {
-      menuHandler.updateParameterValue(0.1);
-    } 
-    else {
+  else if (inputHandler.isUpButtonPressed())
+  {
+    if (menuHandler.isEditMode())
+    {
+      MenuItem *currentItem = menuHandler.getCurrentItem();
+      switch (currentItem->getType())
+      {
+      case EDITABLE_ITEM:
+        menuHandler.updateParameterValue(0.1);
+        break;
+      case EDITABLE_UINT8_ITEM:
+        menuHandler.updateParameterValueUint8(1);
+        break;
+      }
+    }
+    else
+    {
       menuHandler.previousItem();
     }
-    //Serial.println(menuHandler.getCurrentItem()->getName());
+    // Serial.println(menuHandler.getCurrentItem()->getName());
     menuHandler.displayCurrentItem();
   }
-  else if (inputHandler.isDownButtonPressed()) {
-    if (menuHandler.isEditMode()) {
-      menuHandler.updateParameterValue(-0.1);
-    } 
-    else {
+  else if (inputHandler.isDownButtonPressed())
+  {
+    if (menuHandler.isEditMode())
+    {
+      MenuItem *currentItem = menuHandler.getCurrentItem();
+      switch (currentItem->getType())
+      {
+      case EDITABLE_ITEM:
+        menuHandler.updateParameterValue(-0.1);
+        break;
+      case EDITABLE_UINT8_ITEM:
+        menuHandler.updateParameterValueUint8(-1);
+        break;
+      }
+    }
+    else
+    {
       menuHandler.nextItem();
     }
-    //Serial.println(menuHandler.getCurrentItem()->getName());
+    // Serial.println(menuHandler.getCurrentItem()->getName());
     menuHandler.displayCurrentItem();
   }
-  
-  switch (currentState) {
-    case PLAYING:
-      if (currentTime - lastChangeTime >= noteDuration) {
-        currentWaveform->setFrequency(0); // Silence the output for a break
-        currentState = BREAK;
-        lastChangeTime = currentTime;
-      }
-      break;
-    case BREAK:
-      if (currentTime - lastChangeTime >= breakDuration) {
-        bioValue = analogRead(bioSensorPin);
-        dataValue = applyFilter(bioValue, filterIndex);
-        float freq = harmonicMapping(dataValue, 0, 1023, 110);
-        //currentWaveform->setFrequency(freq);
-        currentWaveform->setFrequency(110); //for testing not as annoying
-        currentState = PLAYING;
-        lastChangeTime = currentTime;
-      }
-      break;
+
+  switch (currentState)
+  {
+  case PLAYING:
+    if (currentTime - lastChangeTime >= noteDuration)
+    {
+      currentWaveform->setFrequency(0); // Silence the output for a break
+      currentState = BREAK;
+      lastChangeTime = currentTime;
+    }
+    break;
+  case BREAK:
+    if (currentTime - lastChangeTime >= breakDuration)
+    {
+      bioValue = analogRead(bioSensorPin);
+      dataValue = applyFilter(bioValue, filterIndex);
+      float freq = harmonicMapping(dataValue, 0, 1023, 110);
+      // currentWaveform->setFrequency(freq);
+      currentWaveform->setFrequency(110); // for testing not as annoying
+      currentState = PLAYING;
+      lastChangeTime = currentTime;
+    }
+    break;
   }
 }
 
-int updateAudio(){
+int updateAudio()
+{
   return currentWaveform->update();
 }

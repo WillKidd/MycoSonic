@@ -203,6 +203,9 @@ void MenuHandler::enterEditMode() {
     if (currentItem->getType() == EDITABLE_ITEM) {
         editMode = true;
         originalValue = static_cast<EditableMenuItem*>(currentItem)->getParameterValue();
+    } else if (currentItem->getType() == EDITABLE_UINT8_ITEM) {
+        editMode = true;
+        originalUint8Value = static_cast<EditableMenuItemSingleUint8*>(currentItem)->getParameterValue();
     }
 }
 
@@ -228,15 +231,19 @@ void MenuHandler::updateParameterValue(float delta) {
 }
 
 void MenuHandler::saveChanges() {
-    if (editMode && currentItem->getType() == EDITABLE_ITEM) {
-        exitEditMode(); // Saves changes and exits edit mode
+    if (editMode){
+        exitEditMode();
     }
 }
 
 void MenuHandler::discardChanges() {
-    if (editMode && currentItem->getType() == EDITABLE_ITEM) {
-        static_cast<EditableMenuItem*>(currentItem)->setParameterValue(originalValue);
-        exitEditMode(); // Discards changes and exits edit mode
+    if (editMode) {
+        if (currentItem->getType() == EDITABLE_ITEM) {
+            static_cast<EditableMenuItem*>(currentItem)->setParameterValue(originalValue);
+        } else if (currentItem->getType() == EDITABLE_UINT8_ITEM) {
+            static_cast<EditableMenuItemSingleUint8*>(currentItem)->setParameterValue(originalUint8Value);
+        }
+        exitEditMode();
     }
 }
 
@@ -257,9 +264,9 @@ void MenuHandler::updateParameterValueUint8(int8_t delta) {
 void MenuHandler::displayCurrentItem() const {
     if (!lcdHandler) return; // Check if LCDHandler is set
     char buffer[16]; // Buffer for storing strings read from PROGMEM
+    memset(buffer, '\0', sizeof(buffer)); //Clear buffer
 
     // First line: Display the name of the current menu item
-    // Assuming getName() correctly handles PROGMEM
     copyProgMemString(currentItem->getName(), buffer, sizeof(buffer));
     Serial.println(buffer);  // Debug print
     lcdHandler->clearDisplay(); // Clear the display before showing new information
@@ -283,21 +290,24 @@ void MenuHandler::displayCurrentItem() const {
             copyProgMemString(strValue, buffer, sizeof(buffer)); // Copy "Value: " into buffer
             lcdHandler->displayText(buffer, 0, 1); // Display "Value: "
 
-            // Assuming getFormattedValue() returns a RAM-based string
             lcdHandler->displayText(editableItem->getFormattedValue(), 7, 1);
             break;
         }
         case EDITABLE_UINT8_ITEM: {
             auto editableUint8Item = static_cast<EditableMenuItemSingleUint8*>(currentItem);
             copyProgMemString(strValue, buffer, sizeof(buffer));
-            lcdHandler->displayText(buffer, 0, 1);
-            lcdHandler->displayText(editableUint8Item->getFormattedValue(), 7, 1);
+            lcdHandler->displayText(buffer, 0, 1); // Display "Value: "
+
+            String valueStr = editableUint8Item->getFormattedValue();
+            while (valueStr.length() < (16 - 7)) {
+                valueStr += " ";
+            }
+            lcdHandler->displayText(valueStr, 7, 1);
             break;
-        }
-        case BASE_ITEM:{
-            break;
-        }
-        // ... handle other item types as needed ...
+            }
+            case BASE_ITEM:{
+                break;
+            }
     }
 }
 
