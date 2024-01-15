@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include "signal_processing.h"
-// #include "data_handler.h"
-#include <SPI.h>
+#include "data_handler.h"
+//#include <SPI.h>
 #include "mozzi-audio.h"
 #include "audio-math.h"
 #include "input_handler.h"
@@ -49,7 +49,7 @@ bool useMidiOutput = false;
 
 uint8_t filterIndex = 0;
 
-float dataValue;
+uint16_t dataValue;
 uint16_t bioValue;
 
 unsigned long lastChangeTime;
@@ -319,7 +319,7 @@ int applyEffectsChain(int inputSample) {
 void setup()
 {
   Serial.begin(9600);
-  // initSDCard();
+  initSDCard();
   startMozzi(64);
 
   lastChangeTime = millis();
@@ -378,6 +378,7 @@ void setup()
   menuHandler.selectItem();
   menuHandler.displayCurrentItem();
   currentWaveform = new SineWave(0);
+  currentWaveform->setFrequency(0);
   // Serial.println(inputItem.getName());
 }
 
@@ -499,15 +500,27 @@ else if (inputHandler.isEditPressed()) {
   case BREAK:
     if (currentTime - lastChangeTime >= breakDuration)
     {
-      noteDuration = noteDurationToTime(noteDurationType, bpm, beatUnit, defaultBeatUnit);
-      breakDuration = noteDurationToTime(breakDurationType, bpm, beatUnit, defaultBeatUnit);
-      bioValue = analogRead(bioSensorPin);
-      dataValue = applySelectedFilter(bioValue);
-      uint16_t freq = mapToFullSpectrum(dataValue, 0, 1023);
-      currentWaveform->setFrequency(freq);
+      if (useSensorInput){
+        bioValue = analogRead(bioSensorPin);
+      } 
+      else if (useSDCardInput){
+        bioValue = readDataFromSD();
+      }
+      if(useAudioOutput){
+        noteDuration = noteDurationToTime(noteDurationType, bpm, beatUnit, defaultBeatUnit);
+        breakDuration = noteDurationToTime(breakDurationType, bpm, beatUnit, defaultBeatUnit);
+        dataValue = applySelectedFilter(bioValue);
+        uint16_t freq = mapToFullSpectrum(dataValue, 0, 1023);
+        currentWaveform->setFrequency(freq);
+      } 
+      else if (useSDCardOutput) {
+        char buffer[4];
+        snprintf(buffer, sizeof(buffer), "%u", bioValue);
+        logData(String(buffer));
+      }
+      else if (useMidiOutput){
 
-
-
+      }
       currentState = PLAYING;
       lastChangeTime = currentTime;
     }
