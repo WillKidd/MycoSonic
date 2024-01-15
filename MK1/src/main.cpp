@@ -455,6 +455,8 @@ else if (inputHandler.isEditPressed()) {
       case EDITABLE_UINT8_ITEM:
         menuHandler.updateParameterValueUint8(1);
         break;
+      default:
+      break;
       }
     }
     else
@@ -477,6 +479,8 @@ else if (inputHandler.isEditPressed()) {
       case EDITABLE_UINT8_ITEM:
         menuHandler.updateParameterValueUint8(-1);
         break;
+      default:
+      break;
       }
     }
     else
