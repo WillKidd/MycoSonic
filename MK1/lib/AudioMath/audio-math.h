@@ -21,7 +21,8 @@ enum MappingType {
 };
 
 // Function Declarations
-uint16_t midiNoteToFrequency(uint8_t midiNumber);
+uint16_t inputToMidiNote(uint16_t input, uint16_t inputMin, uint16_t inputMax);
+//uint16_t midiNoteToFrequency(uint8_t midiNumber);
 uint8_t frequencyToMIDINote(float frequency);
 uint16_t mapToScale(uint16_t input, uint16_t inputMin, uint16_t inputMax, uint8_t keyRootMidiNote, const uint8_t intervals[], uint8_t numIntervals);
 uint16_t mapToFullSpectrum(uint16_t input, uint16_t inputMin, uint16_t inputMax);
