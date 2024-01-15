@@ -1,2 +1,2 @@
 # MycoSonic
-Fungi-MIDI-Interface
+Fungi-Interface
