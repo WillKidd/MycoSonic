@@ -115,6 +115,9 @@ float millisecondsPerBeat(uint8_t bpm) {
 // defaultBeatUnit: The default note value for one beat (usually a quarter note, represented as 4)
 
 float noteDurationToTime(uint8_t noteType, uint8_t bpm, uint8_t beatUnit, uint8_t defaultBeatUnit = 4) {
+    if (noteType <= 0){
+        return 0.0;
+    }
     float beatDuration = millisecondsPerBeat(bpm);
 
     // Adjust the duration based on the beat unit
