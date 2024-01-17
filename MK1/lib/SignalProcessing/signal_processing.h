@@ -3,11 +3,12 @@
 
 #include <Arduino.h>
 
-uint16_t movingAverage(uint16_t newValue);
-uint16_t lowPassFilter(uint16_t newValue);
-uint16_t highPassFilter(uint16_t newValue);
-uint16_t notchFilter(uint16_t newValue);
-uint16_t medianFilter(uint16_t newValue);
-uint16_t kalmanFilter(uint16_t newValue);
+float movingAverage(int newValue);
+float lowPassFilter(int newValue);
+float highPassFilter(int newValue);
+float notchFilter(int newValue);
+float medianFilter(int newValue);
+float kalmanFilter(float newValue);
+float applyFilter(int newValue, int filterIndex);
 
 #endif

@@ -8,7 +8,7 @@
 #include "menu_system.h"
 #include <avr/pgmspace.h>
 
-const uint8_t bioSensorPin = A0;
+const int bioSensorPin = A0;
 
 bool useSDCardInput = false;
 bool useSensorInput = true;
@@ -48,10 +48,10 @@ bool useAudioOutput = true;
 bool useSDCardOutput = false;
 bool useMidiOutput = false;
 
-uint8_t filterIndex = 0;
+uint filterIndex = 0;
 
-uint16_t dataValue;
-uint16_t bioValue;
+int dataValue;
+int bioValue;
 
 unsigned long lastChangeTime;
 bool isNotePlaying = true;
@@ -72,25 +72,25 @@ uint8_t scaleType = 0;
 uint8_t baseFrequencyMidiNote = 69; // Example base frequency
 
 
-uint8_t majorIntervals[] = {2, 2, 1, 2, 2, 2, 1};
-uint8_t dorianMode[] = {2, 1, 2, 2, 2, 1, 2};
-uint8_t mixolydianMode[] = {2, 2, 1, 2, 2, 1, 2};
-uint8_t minorIntervals[] = {2, 1, 2, 2, 1, 2, 2};
-uint8_t harmonicMinorIntervals[] = {2, 1, 2, 2, 1, 3, 1};
-uint8_t melodicMinorIntervals[] = {2, 1, 2, 2, 2, 2, 1};
-uint8_t pentatonicMajorIntervals[] = {2, 2, 3, 2, 3};
-uint8_t pentatonicMinorIntervals[] = {3, 2, 2, 3, 2};
-uint8_t bluesIntervals[] = {3, 2, 1, 1, 3, 2};
-uint8_t wholeToneIntervals[] = {2, 2, 2, 2, 2, 2};
-uint8_t chromaticIntervals[] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
-uint8_t lydianDominantIntervals[] = {2, 2, 2, 1, 2, 1, 2};
-uint8_t halfWholeDiminishedIntervals[] = {1, 2, 1, 2, 1, 2, 1, 2};
-uint8_t wholeHalfDiminishedIntervals[] = {2, 1, 2, 1, 2, 1, 2, 1};
-uint8_t alteredIntervals[] = {1, 2, 1, 2, 2, 2, 2};
-uint8_t bebopDominantIntervals[] = {2, 2, 1, 2, 2, 1, 1, 1};
+int majorIntervals[] = {2, 2, 1, 2, 2, 2, 1};
+int dorianMode[] = {2, 1, 2, 2, 2, 1, 2};
+int mixolydianMode[] = {2, 2, 1, 2, 2, 1, 2};
+int minorIntervals[] = {2, 1, 2, 2, 1, 2, 2};
+int harmonicMinorIntervals[] = {2, 1, 2, 2, 1, 3, 1};
+int melodicMinorIntervals[] = {2, 1, 2, 2, 2, 2, 1};
+int pentatonicMajorIntervals[] = {2, 2, 3, 2, 3};
+int pentatonicMinorIntervals[] = {3, 2, 2, 3, 2};
+int bluesIntervals[] = {3, 2, 1, 1, 3, 2};
+int wholeToneIntervals[] = {2, 2, 2, 2, 2, 2};
+int chromaticIntervals[] = {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1};
+int lydianDominantIntervals[] = {2, 2, 2, 1, 2, 1, 2};
+int halfWholeDiminishedIntervals[] = {1, 2, 1, 2, 1, 2, 1, 2};
+int wholeHalfDiminishedIntervals[] = {2, 1, 2, 1, 2, 1, 2, 1};
+int alteredIntervals[] = {1, 2, 1, 2, 2, 2, 2};
+int bebopDominantIntervals[] = {2, 2, 1, 2, 2, 1, 1, 1};
 
 // Array of pointers to the interval arrays
-uint8_t* scaleIntervals[] = {
+int* scaleIntervals[] = {
     majorIntervals,
     dorianMode,
     mixolydianMode,
@@ -270,7 +270,7 @@ uint16_t applySelectedMapping(uint16_t input, uint16_t inputMin, uint16_t inputM
     if (useMapToScale) {
         // Ensure scaleType is within the range of defined scales
         scaleType = min(scaleType, sizeof(scaleIntervals) / sizeof(scaleIntervals[0]) - 1);
-        uint8_t* intervals = scaleIntervals[scaleType];
+        int* intervals = scaleIntervals[scaleType];
         uint8_t numIntervals = sizeof(intervals) / sizeof(intervals[0]);
 
         mappedValue = mapToScale(mappedValue, inputMin, inputMax, keyMidiNote, intervals, numIntervals);
