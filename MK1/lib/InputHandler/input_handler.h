@@ -18,11 +18,11 @@ public:
 
 private:
     const uint8_t okButtonPin = 5;
-    const uint8_t editButtonPin = 4;
-    const uint8_t backButtonPin = 2;
-    const uint8_t toggleButtonPin = 6;
-    const uint8_t upButtonPin = 7;
-    const uint8_t downButtonPin = 8;
+    const uint8_t editButtonPin = 2;
+    const uint8_t backButtonPin = 6; 
+    const uint8_t toggleButtonPin = 4; 
+    const uint8_t upButtonPin = 8;
+    const uint8_t downButtonPin = 7;
 
     // Bounce objects for debouncing
     Bounce okDebouncer, editDebouncer, backDebouncer, toggleDebouncer;

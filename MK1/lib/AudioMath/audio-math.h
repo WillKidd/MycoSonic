@@ -27,7 +27,7 @@ uint8_t frequencyToMIDINote(float frequency);
 uint16_t mapToScale(uint16_t input, uint16_t inputMin, uint16_t inputMax, uint8_t keyRootMidiNote, const uint8_t intervals[], uint8_t numIntervals);
 uint16_t mapToFullSpectrum(uint16_t input, uint16_t inputMin, uint16_t inputMax);
 uint16_t dynamicRangeCompressionMapping(uint16_t input, uint16_t inputMin, uint16_t inputMax, const uint8_t intervals[], uint8_t numIntervals);
-uint16_t harmonicMapping(uint16_t input, uint16_t inputMin, uint16_t inputMax, uint16_t baseFrequency);
+uint16_t harmonicMapping(uint16_t input, uint16_t inputMin, uint16_t inputMax, uint8_t baseFrequencyMidiNote);
 float millisecondsPerBeat(uint8_t bpm);
 float noteDurationToTime(uint8_t noteType, uint8_t bpm, uint8_t beatUnit, uint8_t defaultBeatUnit);
 float noteDurationToTimeFractional(float noteTypeRatio, uint8_t bpm, uint8_t beatUnit, uint8_t defaultBeatUnit);

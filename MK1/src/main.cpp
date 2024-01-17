@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include "signal_processing.h"
 #include "data_handler.h"
-//#include <SPI.h>
+#include <SPI.h>
 #include "mozzi-audio.h"
 #include "audio-math.h"
 #include "input_handler.h"
@@ -10,8 +10,8 @@
 
 const uint8_t bioSensorPin = A0;
 
-bool useSDCardInput = true;
-bool useSensorInput = false;
+bool useSDCardInput = false;
+bool useSensorInput = true;
 
 //bool useInputFilter = true;
 bool useMovingAverage = true;
@@ -21,8 +21,8 @@ bool useNotch = false;
 bool useMedian = false;
 bool useKalman = false;
 
-bool useMapToScale = false;
-bool useMapToFullSpectrum = true;
+bool useMapToScale = true;
+bool useMapToFullSpectrum = false;
 bool useDynamicRangeCompression = false;
 bool useHarmonicMapping = false;
 
@@ -32,6 +32,7 @@ bool useSquareWave = false;
 bool useSawToothWave = false;
 
 //bool useEffects = false;
+bool useNoEffect = true;
 bool usePhaseModulation = false;
 bool useTremolo = false;
 bool useBitCrusher = false;
@@ -67,6 +68,9 @@ float breakDuration; // Duration of a break in milliseconds
 
 uint8_t keyMidiNote = 69;
 uint8_t scaleType = 0;
+
+uint8_t baseFrequencyMidiNote = 69; // Example base frequency
+
 
 uint8_t majorIntervals[] = {2, 2, 1, 2, 2, 2, 1};
 uint8_t dorianMode[] = {2, 1, 2, 2, 2, 1, 2};
@@ -162,6 +166,7 @@ const char squareWaveItemName[] PROGMEM = "Square";
 const char sawWaveItemName[] PROGMEM = "SawTooth";
 
 const char outputFilterItemName[] PROGMEM = "Effects";
+const char noEffectItemName[] PROGMEM = "DirectOutput";
 const char phaseModulationEffectItemName[] PROGMEM = "PhaseMod.";
 const char tremoloEffectItemName[] PROGMEM = "Tremolo";
 const char bitCrusherEffectItemName[] PROGMEM = "BitCrusher";
@@ -182,14 +187,14 @@ InputHandler inputHandler;
 MenuItem rootItem(rootItemName, BASE_ITEM);
 
 MenuItem inputItem(inputItemName, BASE_ITEM);
-ToggleMenuItem sensorItem(sensorItemName, useSDCardInput, SINGLE_TOGGLE_ITEM);
-ToggleMenuItem sdItem(sdItemName, useSensorInput, SINGLE_TOGGLE_ITEM);
+ToggleMenuItem sensorItem(sensorItemName, useSensorInput, SINGLE_TOGGLE_ITEM);
+ToggleMenuItem sdItem(sdItemName, useSDCardInput, SINGLE_TOGGLE_ITEM);
 
 MenuItem inputFilterItem(inputFilterItemName, BASE_ITEM);
 ToggleMenuItem movingAverageItem(movingAverageItemName, useMovingAverage, SINGLE_TOGGLE_ITEM);
 ToggleMenuItem lowPassItem(lowPassItemName, useLowPass, SINGLE_TOGGLE_ITEM);
 ToggleMenuItem highPassItem(highPassItemName, useHighPass, SINGLE_TOGGLE_ITEM);
-ToggleMenuItem notchItem(notchItemName, useNotch, SINGLE_TOGGLE_ITEM);
+//ToggleMenuItem notchItem(notchItemName, useNotch, SINGLE_TOGGLE_ITEM);
 ToggleMenuItem medianItem(medianItemName, useMedian, SINGLE_TOGGLE_ITEM);
 ToggleMenuItem kalmanItem(kalmanItemName, useKalman, SINGLE_TOGGLE_ITEM);
 
@@ -205,6 +210,7 @@ EditableMenuItemSingleUint8 scaleTypItem(scaleTypeItemName, scaleType);
 ToggleMenuItem mapToFullSpectrumItem(mapToFullSpectrumItemName, useMapToFullSpectrum, SINGLE_TOGGLE_ITEM);
 ToggleMenuItem dynamicRangeCompressionItem(dynamicRangeCompressionItemName, useDynamicRangeCompression, SINGLE_TOGGLE_ITEM);
 ToggleMenuItem harmonicMappingItem(harmonicMappingItemName, useHarmonicMapping, SINGLE_TOGGLE_ITEM);
+EditableMenuItemSingleUint8 baseFrequencyItem(baseFrequencyItemName, baseFrequencyMidiNote);
 
 MenuItem waveTypeItem (waveTypeItemName, BASE_ITEM);
 ToggleMenuItem sineWaveItem (sineWaveItemName, useSineWave, SINGLE_TOGGLE_ITEM);
@@ -213,16 +219,17 @@ ToggleMenuItem squareWaveItem (squareWaveItemName, useSquareWave, SINGLE_TOGGLE_
 ToggleMenuItem sawWaveItem (sawWaveItemName, useSawToothWave, SINGLE_TOGGLE_ITEM);
 
 MenuItem outputFilterItem(outputFilterItemName, BASE_ITEM);
-ToggleMenuItem phaseModulationEffectItem(phaseModulationEffectItemName, usePhaseModulation, MULTI_TOGGLE_ITEM);
-ToggleMenuItem tremoloEffectItem(tremoloEffectItemName, useTremolo, MULTI_TOGGLE_ITEM);
-ToggleMenuItem bitCrusherEffectItem(bitCrusherEffectItemName, useBitCrusher, MULTI_TOGGLE_ITEM);
-ToggleMenuItem ringModulatorEffectItem(ringModulatorEffectItemName, useRingModulator, MULTI_TOGGLE_ITEM);
-ToggleMenuItem flangerEffectItem(flangerEffectItemName, useFlanger, MULTI_TOGGLE_ITEM);
-ToggleMenuItem pitchShiferEffectItem(pitchShiferEffectItemName, usePitchShifter, MULTI_TOGGLE_ITEM);
-ToggleMenuItem distortionEffectItem(distortionEffectItemName, useDistortion, MULTI_TOGGLE_ITEM);
-ToggleMenuItem panEffectItem(panEffectItemName, usePan, MULTI_TOGGLE_ITEM);
-ToggleMenuItem vibratoEffectItem(vibratoEffectItemName, useVibrato, MULTI_TOGGLE_ITEM);
-ToggleMenuItem leslieEffectItem(leslieEffectItemName, useLeslie, MULTI_TOGGLE_ITEM);
+ToggleMenuItem noEffectItem(noEffectItemName, useNoEffect, SINGLE_TOGGLE_ITEM);
+ToggleMenuItem phaseModulationEffectItem(phaseModulationEffectItemName, usePhaseModulation, SINGLE_TOGGLE_ITEM);
+ToggleMenuItem tremoloEffectItem(tremoloEffectItemName, useTremolo, SINGLE_TOGGLE_ITEM);
+ToggleMenuItem bitCrusherEffectItem(bitCrusherEffectItemName, useBitCrusher, SINGLE_TOGGLE_ITEM);
+ToggleMenuItem ringModulatorEffectItem(ringModulatorEffectItemName, useRingModulator, SINGLE_TOGGLE_ITEM);
+ToggleMenuItem flangerEffectItem(flangerEffectItemName, useFlanger, SINGLE_TOGGLE_ITEM);
+ToggleMenuItem pitchShiferEffectItem(pitchShiferEffectItemName, usePitchShifter, SINGLE_TOGGLE_ITEM);
+ToggleMenuItem distortionEffectItem(distortionEffectItemName, useDistortion, SINGLE_TOGGLE_ITEM);
+ToggleMenuItem panEffectItem(panEffectItemName, usePan, SINGLE_TOGGLE_ITEM);
+ToggleMenuItem vibratoEffectItem(vibratoEffectItemName, useVibrato, SINGLE_TOGGLE_ITEM);
+ToggleMenuItem leslieEffectItem(leslieEffectItemName, useLeslie, SINGLE_TOGGLE_ITEM);
 
 MenuItem outputItem(outputItemName, BASE_ITEM);
 ToggleMenuItem audioOutputItem(audioOutputItemName, useAudioOutput, SINGLE_TOGGLE_ITEM);
@@ -273,14 +280,14 @@ uint16_t applySelectedMapping(uint16_t input, uint16_t inputMin, uint16_t inputM
         mappedValue = mapToFullSpectrum(mappedValue, inputMin, inputMax);
     }
     if (useHarmonicMapping) {
-        uint16_t baseFrequency = A4_FREQ; // Example base frequency
-        mappedValue = harmonicMapping(mappedValue, inputMin, inputMax, baseFrequency);
+        mappedValue = harmonicMapping(mappedValue, inputMin, inputMax, baseFrequencyMidiNote);
     }
 
     return mappedValue;
 }
 
 int applyEffectsChain(int inputSample) {
+
     // Enable or disable each effect based on the current boolean flags
     phaseModulationEffect.setEffectEnabled(usePhaseModulation);
     tremoloEffect.enableEffect(useTremolo);
@@ -292,6 +299,10 @@ int applyEffectsChain(int inputSample) {
     panEffect.enableEffect(usePan);
     vibratoEffect.enableEffect(useVibrato);
     leslieEffect.enableEffect(useLeslie);
+
+    if (useNoEffect){
+      return inputSample;
+    }
 
     // Apply each effect in sequence
     inputSample = phaseModulationEffect.applyEffect(inputSample);
@@ -319,7 +330,7 @@ int applyEffectsChain(int inputSample) {
 void setup()
 {
   Serial.begin(9600);
-  initSDCard();
+  //initSDCard();
   startMozzi(64);
 
   lastChangeTime = millis();
@@ -334,7 +345,7 @@ void setup()
   inputFilterItem.addChild(&movingAverageItem);
   inputFilterItem.addChild(&lowPassItem);
   inputFilterItem.addChild(&highPassItem);
-  inputFilterItem.addChild(&notchItem);
+  //inputFilterItem.addChild(&notchItem);
   inputFilterItem.addChild(&medianItem);
   inputFilterItem.addChild(&kalmanItem);
 
@@ -351,6 +362,7 @@ void setup()
   signalMappingItem.addChild(&dynamicRangeCompressionItem);
   signalMappingItem.addChild(&harmonicMappingItem);
 
+
   rootItem.addChild(&waveTypeItem);
   waveTypeItem.addChild(&sineWaveItem);
   waveTypeItem.addChild(&triangleWaveItem);
@@ -358,6 +370,7 @@ void setup()
   waveTypeItem.addChild(&sawWaveItem);
 
   rootItem.addChild(&outputFilterItem);
+  outputFilterItem.addChild(&noEffectItem);
   outputFilterItem.addChild(&phaseModulationEffectItem);
   outputFilterItem.addChild(&tremoloEffectItem);
   outputFilterItem.addChild(&bitCrusherEffectItem);
@@ -506,9 +519,10 @@ else if (inputHandler.isEditPressed()) {
     {
       if (useSensorInput){
         bioValue = analogRead(bioSensorPin);
+        Serial.println(bioValue);
       } 
       else if (useSDCardInput){
-        bioValue = readDataFromSD();
+        //bioValue = readDataFromSD();
       }
       if(useAudioOutput){
         noteDuration = noteDurationToTime(noteDurationType, bpm, beatUnit, defaultBeatUnit);
@@ -518,9 +532,9 @@ else if (inputHandler.isEditPressed()) {
         currentWaveform->setFrequency(freq);
       } 
       else if (useSDCardOutput) {
-        char buffer[4];
-        snprintf(buffer, sizeof(buffer), "%u", bioValue);
-        logData(String(buffer));
+        //char buffer[4];
+        //snprintf(buffer, sizeof(buffer), "%u", bioValue);
+        //logData(String(buffer));
       }
       else if (useMidiOutput){
 

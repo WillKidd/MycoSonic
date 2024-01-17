@@ -69,7 +69,8 @@ float dynamicRangeCompressionMapping(uint16_t input, uint16_t inputMin, uint16_t
 }
 
 // Function for harmonic mapping
-uint16_t harmonicMapping(uint16_t input, uint16_t inputMin, uint16_t inputMax, uint16_t baseFrequency) {
+uint16_t harmonicMapping(uint16_t input, uint16_t inputMin, uint16_t inputMax, uint8_t baseFrequencyMidiNote) {
+    uint16_t baseFrequency = midiNoteToFrequency(baseFrequencyMidiNote);
     // Normalize input to a harmonic index (1st, 2nd, 3rd harmonic, etc.)
     uint8_t harmonicIndex = map(input, inputMin, inputMax, 1, 10);
 
