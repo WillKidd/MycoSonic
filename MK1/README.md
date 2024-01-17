@@ -1,9 +1,11 @@
 PWM Pin (for Mozzi library)
 
+(AudioOut)
 Arduino Uno: Digital Pin 9
 Arduino Mega 2560: Digital Pin 11 (Standard Mozzi Pin)
 MOSI Pin (for SPI communication)
 
+(LO+)
 Arduino Uno: Digital Pin 11
 Arduino Mega 2560: Digital Pin 51
 MISO Pin (for SPI communication)
@@ -20,5 +22,6 @@ Arduino Uno: Analog Pin A4
 Arduino Mega 2560: Digital Pin 20
 SCL Pin (for I²C communication)
 
+(Output (Sensor))
 Arduino Uno: Analog Pin A5
 Arduino Mega 2560: Digital Pin 21
