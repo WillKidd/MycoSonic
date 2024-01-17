@@ -330,7 +330,7 @@ int applyEffectsChain(int inputSample) {
 void setup()
 {
   Serial.begin(9600);
-  //initSDCard();
+  initSDCard();
   startMozzi(64);
 
   lastChangeTime = millis();
@@ -532,9 +532,9 @@ else if (inputHandler.isEditPressed()) {
         currentWaveform->setFrequency(freq);
       } 
       else if (useSDCardOutput) {
-        //char buffer[4];
-        //snprintf(buffer, sizeof(buffer), "%u", bioValue);
-        //logData(String(buffer));
+        char buffer[4];
+        snprintf(buffer, sizeof(buffer), "%u", bioValue);
+        logData(String(buffer));
       }
       else if (useMidiOutput){
 

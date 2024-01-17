@@ -9,7 +9,7 @@ const uint16_t A4_FREQ = 440;
 const float SEMITONE_RATIO = 1.059463094359; // 2^(1/12)
 const uint8_t MIDI_NOTE_A4 = 69;
 const uint8_t MIN_MIDI_NOTE = 21;  // A0, lowest note on standard piano
-const uint8_t MAX_MIDI_NOTE = 108; // C8, highest note on standard piano
+const uint8_t MAX_MIDI_NOTE = 84; // C8, highest note on standard piano
 const uint8_t MAX_SCALE_NOTES = 100; // Estimate for max number of notes needed
 
 // Enum to specify the mapping type
