@@ -1,12 +1,5 @@
 #include "audio-math.h"
 
-#define A4_FREQ 440.0
-#define SEMITONE_RATIO 1.059463094359 // 2^(1/12)
-#define MIDI_NOTE_A4 69
-#define MIN_MIDI_NOTE 21  // A0, lowest note on standard piano
-#define MAX_MIDI_NOTE 108 // C8, highest note on standard piano
-#define MAX_SCALE_NOTES 100 // Estimate for max number of notes needed
-
 float midiNoteToFrequency(int midiNumber) {
     // Bounds checking
     if (midiNumber < MIN_MIDI_NOTE) midiNumber = MIN_MIDI_NOTE;
@@ -27,7 +20,6 @@ int frequencyToMIDINote(float frequency) {
     // Clamp the MIDI note to the valid range
     if (midiNote < MIN_MIDI_NOTE) midiNote = MIN_MIDI_NOTE;
     if (midiNote > MAX_MIDI_NOTE) midiNote = MAX_MIDI_NOTE;
-
     return midiNote;
 }
 
@@ -49,6 +41,10 @@ float mapToScale(int input, int inputMin, int inputMax, int keyRootMidiNote, con
     return midiNoteToFrequency(midiNote);
 }
 
+/*
+uint16_t
+uint8_t
+*/
 // Function for full spectrum mapping
 float mapToFullSpectrum(int input, int inputMin, int inputMax) {
     int midiNumber = map(input, inputMin, inputMax, MIN_MIDI_NOTE, MAX_MIDI_NOTE);
@@ -104,13 +100,15 @@ float millisecondsPerBeat(int bpm) {
 // defaultBeatUnit: The default note value for one beat (usually a quarter note, represented as 4)
 
 float noteDurationToTime(int noteType, int bpm, int beatUnit, int defaultBeatUnit = 4) {
+    if (noteType <= 0){
+        return 0.0;
+    }
     float beatDuration = millisecondsPerBeat(bpm);
 
     // Adjust the duration based on the beat unit
     if (beatUnit != defaultBeatUnit) {
         beatDuration *= (float(defaultBeatUnit) / beatUnit);
     }
-
     // Calculate the duration of the specified note type
     return beatDuration * (4.0 / noteType);
 }
@@ -122,7 +120,6 @@ float noteDurationToTimeFractional(float noteTypeRatio, int bpm, int beatUnit, i
     if (beatUnit != defaultBeatUnit) {
         beatDuration *= (float(defaultBeatUnit) / beatUnit);
     }
-
     // Calculate the duration of the specified note type
     return beatDuration * noteTypeRatio;
 }

@@ -9,7 +9,6 @@ float total = 0;
 // Variables needed for the Low-Pass Filter
 float lastLowPassFiltered = 0;
 float alpha = 0.1; // Smoothing factor for low and high-pass filter
-
 // Variables needed for the High-Pass Filter
 float lastHighPassFiltered = 0;
 float lastInput = 0;
@@ -79,11 +78,9 @@ float medianFilter(int newValue) {
             sortedWindow[j - 1] = temp;
         }
     }
-
     // Return the median value
     return sortedWindow[medianWindowSize / 2];
 }
-
 // Variables for Kalman Filter
 float kalmanEstimate = 0; // The current Kalman estimate
 float kalmanErrorEstimate = 1; // Error in the Kalman estimate

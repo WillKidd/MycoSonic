@@ -5,12 +5,12 @@
 #include <math.h>
 
 // Constants
-#define A4_FREQ 440.0
-#define SEMITONE_RATIO 1.059463094359 // 2^(1/12)
-#define MIDI_NOTE_A4 69
-#define MIN_MIDI_NOTE 21  // A0, lowest note on standard piano
-#define MAX_MIDI_NOTE 108 // C8, highest note on standard piano
-#define MAX_SCALE_NOTES 100 // Estimate for max number of notes needed
+const uint16_t A4_FREQ = 440;
+const float SEMITONE_RATIO = 1.059463094359; // 2^(1/12)
+const uint8_t MIDI_NOTE_A4 = 69;
+const uint8_t MIN_MIDI_NOTE = 21;  // A0, lowest note on standard piano
+const uint8_t MAX_MIDI_NOTE = 108; // C8, highest note on standard piano
+const uint8_t MAX_SCALE_NOTES = 100; // Estimate for max number of notes needed
 
 // Enum to specify the mapping type
 enum MappingType {
@@ -21,6 +21,7 @@ enum MappingType {
 };
 
 // Function Declarations
+//uint16_t midiNoteToFrequency(uint8_t midiNumber);
 float midiNoteToFrequency(int midiNumber);
 int frequencyToMIDINote(float frequency);
 float mapToScale(int input, int inputMin, int inputMax, int keyRootMidiNote, const int intervals[], int numIntervals);
