@@ -1,12 +1,14 @@
 #include <Arduino.h>
 #include "signal_processing.h"
 #include "data_handler.h"
+#include <midi-output.h>
 #include <SPI.h>
 #include "mozzi-audio.h"
 #include "audio-math.h"
 #include "input_handler.h"
 #include "menu_system.h"
 #include <avr/pgmspace.h>
+
 
 const int bioSensorPin = A0;
 
@@ -130,6 +132,9 @@ State currentState = PLAYING;
 
 BaseWaveform *currentWaveform = nullptr;
 uint16_t currentFrequency = 220;
+
+MidiOutput midiOutput;
+int midi = 0;
 
 const char rootItemName[] PROGMEM = "MycoSonic MK1";
 const char inputItemName[] PROGMEM = "Input";
@@ -512,6 +517,10 @@ else if (inputHandler.isEditPressed()) {
       currentWaveform->setFrequency(0); // Silence the output for a break
       currentState = BREAK;
       lastChangeTime = currentTime;
+      if (useMidiOutput){
+        dataValue = applySelectedFilter(bioValue);
+        midiOutput.sendNoteOff(1, midi, 0);
+      }
     }
     break;
   case BREAK:
@@ -535,7 +544,9 @@ else if (inputHandler.isEditPressed()) {
         logData(bioValue);
       }
       else if (useMidiOutput){
-
+        dataValue = applySelectedFilter(bioValue);
+        midi = frequencyToMIDINote(dataValue);
+        midiOutput.sendNoteOn(1, midi, 127);
       }
       currentState = PLAYING;
       lastChangeTime = currentTime;
