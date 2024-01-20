@@ -4,7 +4,7 @@
 This document details the configuration of an audio circuit using a 3.5mm audio jack output breakout board, a 10 µF polarized tantalum capacitor, and an appropriate bleeder resistor. The connections are as follows:
 
 1. **3.5mm Audio Jack Output Breakout Board**: 
-    - Tip connected to the positive side of the tantalum capacitor and the Mozzi audio out pin.
+    - Tip connected to the positive side of the tantalum capacitor and the [Mozzi audio out pin](PINOUT.md).
     - Ring1 also connected to the Tip.
     - Sleeve connected to the negative side of the tantalum capacitor and the ground.
 
