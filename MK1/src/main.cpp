@@ -1,7 +1,7 @@
 #include <Arduino.h>
 #include "signal_processing.h"
 #include "data_handler.h"
-#include <midi-output.h>
+#include "MIDI.h"
 #include <SPI.h>
 #include "mozzi-audio.h"
 #include "audio-math.h"
@@ -133,8 +133,8 @@ State currentState = PLAYING;
 BaseWaveform *currentWaveform = nullptr;
 uint16_t currentFrequency = 220;
 
-MidiOutput midiOutput;
-int midi = 0;
+MIDI_CREATE_DEFAULT_INSTANCE();
+uint8_t currMidi;
 
 const char rootItemName[] PROGMEM = "MycoSonic MK1";
 const char inputItemName[] PROGMEM = "Input";
@@ -519,7 +519,7 @@ else if (inputHandler.isEditPressed()) {
       lastChangeTime = currentTime;
       if (useMidiOutput){
         dataValue = applySelectedFilter(bioValue);
-        midiOutput.sendNoteOff(1, midi, 0);
+        MIDI.sendNoteOff(currMidi, 0, 1);
       }
     }
     break;
@@ -545,8 +545,8 @@ else if (inputHandler.isEditPressed()) {
       }
       else if (useMidiOutput){
         dataValue = applySelectedFilter(bioValue);
-        midi = frequencyToMIDINote(dataValue);
-        midiOutput.sendNoteOn(1, midi, 127);
+        currMidi = (uint8_t) frequencyToMIDINote(dataValue);
+        MIDI.sendNoteOn(1, currMidi, 127); 
       }
       currentState = PLAYING;
       lastChangeTime = currentTime;
