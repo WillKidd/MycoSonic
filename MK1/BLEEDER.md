@@ -1,4 +1,3 @@
-
 # Bleeder Resistor to Capacitor Cheatsheet
 
 ## Introduction
@@ -7,12 +6,12 @@ A bleeder resistor is a resistor connected across the terminals of a capacitor i
 ## Basic Formula
 The value of the bleeder resistor can be calculated using the formula:
 
-\[ R = rac{V^2}{P} \]
+R = V^2 / P
 
 Where:
-- \( R \) is the resistance of the bleeder resistor (in ohms, Ω)
-- \( V \) is the voltage across the capacitor (in volts, V)
-- \( P \) is the power dissipation capacity of the resistor (in watts, W)
+- R is the resistance of the bleeder resistor (in ohms, Ω)
+- V is the voltage across the capacitor (in volts, V)
+- P is the power dissipation capacity of the resistor (in watts, W)
 
 ## Considerations
 - **Voltage Rating**: The resistor should have a voltage rating higher than the maximum voltage of the capacitor.
@@ -22,7 +21,7 @@ Where:
 ## Example Calculation
 Assume a capacitor charged to 50V and a desired power dissipation of 0.25W. Using the formula:
 
-\[ R = rac{50^2}{0.25} = 10,000 Ω \]
+R = 50^2 / 0.25 = 10,000 Ω
 
 Thus, a 10kΩ resistor would be suitable.
 
