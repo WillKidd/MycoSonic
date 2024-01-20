@@ -14,6 +14,7 @@ This document details the configuration of an audio circuit using a 3.5mm audio 
 
 3. **Bleeder Resistor**: 
     - Connected in parallel to the tantalum capacitor (across the positive and negative terminals).
+    - In our case a resistor with 100 ohms (circuit has operating voltage of 5v)
 
 ## Circuit Operation
 The circuit utilizes the tantalum capacitor for its audio filtering properties, ensuring a stable and clean audio signal. The bleeder resistor, calculated as per the guidelines in the `BLEEDER.md` cheatsheet, ensures safe discharge of the capacitor when the circuit is powered off.
