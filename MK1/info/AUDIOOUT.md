@@ -5,7 +5,7 @@ This document details the configuration of an audio circuit using a 3.5mm audio 
 
 1. **3.5mm Audio Jack Output Breakout Board**: 
     - Tip connected to the positive side of the tantalum capacitor and the Mozzi audio out pin.
-    - Ring1 also connected to the Tip (assumed to be for stereo output).
+    - Ring1 also connected to the Tip.
     - Sleeve connected to the negative side of the tantalum capacitor and the ground.
 
 2. **10 µF Polarized Tantalum Capacitor**: 
