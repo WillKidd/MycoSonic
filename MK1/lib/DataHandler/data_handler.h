@@ -11,7 +11,7 @@ const String filename = "log.txt";
 
 void initSDCard();
 bool isSDCardAvailable();
-void logData(String data);
+void logData(int data);
 int readDataFromSD();
 void clearLogData();
 

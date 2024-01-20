@@ -522,7 +522,7 @@ else if (inputHandler.isEditPressed()) {
         Serial.println(bioValue);
       } 
       else if (useSDCardInput){
-        //bioValue = readDataFromSD();
+        bioValue = readDataFromSD();
       }
       if(useAudioOutput){
         noteDuration = noteDurationToTime(noteDurationType, bpm, beatUnit, defaultBeatUnit);
@@ -532,9 +532,7 @@ else if (inputHandler.isEditPressed()) {
         currentWaveform->setFrequency(freq);
       } 
       else if (useSDCardOutput) {
-        char buffer[4];
-        snprintf(buffer, sizeof(buffer), "%u", bioValue);
-        logData(String(buffer));
+        logData(bioValue);
       }
       else if (useMidiOutput){
 

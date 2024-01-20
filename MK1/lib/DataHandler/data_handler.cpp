@@ -11,7 +11,7 @@ bool isSDCardAvailable() {
 }
 
 
-void logData(String data) {
+void logData(int data) {
   if (!isSDCardAvailable()) {
     Serial.println("SD card communication error - Cannot log data");
     return;
@@ -19,8 +19,7 @@ void logData(String data) {
   
   File dataFile = SD.open(filename, FILE_WRITE);
   if (dataFile) {
-    dataFile.print(data);
-    dataFile.println();
+    dataFile.println(data);
     dataFile.close();
   } else {
     Serial.println("Error opening log file");
