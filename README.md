@@ -16,7 +16,7 @@ Welcome to the MycoSonic MK1, an Arduino-based interface designed for transformi
 - Biosensor AD8232 (analog output to `A0`)
 - SD card module (optional)
 - [Audio output module](MK1/info/AUDIOOUT.md) (compatible with Mozzi library)
-- LCD and input buttons for menu navigation
+- LCD (with 4-pinned driver) and input buttons for menu navigation
 
 ## Setup
 1. **Hardware Setup:** Connect the biosensor, SD card, and audio output module to the Arduino ([PINOUT](MK1/PINOUT.md)).
