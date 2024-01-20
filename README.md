@@ -19,7 +19,7 @@ Welcome to the MycoSonic MK1, an Arduino-based interface designed for transformi
 - LCD and input buttons for menu navigation
 
 ## Setup
-1. **Hardware Setup:** Connect the biosensor, SD card, and audiou output module to the Arduino.
+1. **Hardware Setup:** Connect the biosensor, SD card, and audio output module to the Arduino ([PINOUT](MK1/PINOUT.md).
 2. **Install Libraries:** Ensure [libraries](MK1/platformio.ini) like Mozzi, SPI, and others necessary for your hardware are installed in the Arduino IDE.
 
 ## Usage
