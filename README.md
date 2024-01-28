@@ -49,6 +49,7 @@ This project is licensed under the MIT License - see the [LICENSE.md](LICENSE.md
 
 ## Acknowledgements
 Thanks to the open-source community and all further contributors.
+Special thanks to [Platform.io](https://platformio.org/).
 
 ---
 
